@@ -12,9 +12,7 @@ public class DisappearedTracker {
     }
 
     public static void markDisappeared(PlayerData pd) {
-        // Usuń jeśli już istnieje (żeby dodać na początek)
         disappeared.removeIf(e -> e.data.name.equals(pd.name));
-        // Dodaj na początek listy (najnowsi na górze)
         disappeared.addFirst(new DisappearedEntry(pd));
     }
 
@@ -28,7 +26,6 @@ public class DisappearedTracker {
 
     public static void clearAll() {
         disappeared.clear();
-        PlayerTracker.reset();
     }
 
     public static class DisappearedEntry {
