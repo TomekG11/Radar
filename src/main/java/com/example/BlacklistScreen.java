@@ -1,163 +1,161 @@
 package com.example;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import net.minecraft.class_2561;
-import net.minecraft.class_310;
-import net.minecraft.class_327;
-import net.minecraft.class_332;
-import net.minecraft.class_342;
-import net.minecraft.class_3532;
-import net.minecraft.class_4185;
-import net.minecraft.class_437;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 
-public class BlacklistScreen extends class_437 {
-   private static final int GUI_W = 500;
-   private static final int GUI_H = 420;
-   private final class_437 parent;
-   private long openTime;
-   private int guiX;
-   private int guiY;
-   private class_342 searchField;
-   private String searchQuery = "";
-   private int scroll = 0;
-   private static final int ENTRY_H = 28;
-   private static final int ENTRY_GAP = 3;
-   private static final int LIST_TOP_OFFSET = 90;
-   private final List<class_4185> unlockButtons = new ArrayList();
+import java.util.*;
 
-   public BlacklistScreen(class_437 parent) {
-      super(class_2561.method_43470("Blacklist"));
-      this.parent = parent;
-      this.openTime = System.currentTimeMillis();
-   }
+public class BlacklistScreen extends Screen {
+    private static final int GUI_W = 500;
+    private static final int GUI_H = 420;
+    private final Screen parent;
+    private long openTime;
+    private int guiX;
+    private int guiY;
+    private TextFieldWidget searchField;
+    private String searchQuery = "";
+    private int scroll = 0;
+    private static final int ENTRY_H = 28;
+    private static final int ENTRY_GAP = 3;
+    private static final int LIST_TOP_OFFSET = 90;
+    private final List<ButtonWidget> unlockButtons = new ArrayList<>();
 
-   protected void method_25426() {
-      super.method_25426();
-      this.guiX = (this.field_22789 - 500) / 2;
-      this.guiY = (this.field_22790 - 420) / 2;
-      this.searchField = new class_342(this.field_22793, this.guiX + 14, this.guiY + 55, 472, 22, class_2561.method_43470("Szukaj..."));
-      this.searchField.method_1880(64);
-      this.searchField.method_1863((s) -> {
-         this.searchQuery = s;
-         this.scroll = 0;
-         this.rebuildButtons();
-      });
-      this.method_37063(this.searchField);
-      this.method_37063(class_4185.method_46430(class_2561.method_43470("§f← Powrót"), (b) -> {
-         class_310.method_1551().method_1507(this.parent);
-      }).method_46434(this.guiX + 250 - 60, this.guiY + 420 - 35, 120, 22).method_46431());
-      this.rebuildButtons();
-   }
+    public BlacklistScreen(Screen parent) {
+        super(Text.literal("Blacklist"));
+        this.parent = parent;
+        this.openTime = System.currentTimeMillis();
+    }
 
-   private void rebuildButtons() {
-      Iterator var1 = this.unlockButtons.iterator();
+    @Override
+    protected void init() {
+        super.init();
+        this.guiX = (this.width - GUI_W) / 2;
+        this.guiY = (this.height - GUI_H) / 2;
 
-      while(var1.hasNext()) {
-         class_4185 btn = (class_4185)var1.next();
-         this.method_37066(btn);
-      }
+        this.searchField = new TextFieldWidget(this.textRenderer, guiX + 14, guiY + 55, 472, 22, Text.literal("Szukaj..."));
+        this.searchField.setMaxLength(64);
+        this.searchField.setChangedListener(s -> {
+            this.searchQuery = s;
+            this.scroll = 0;
+            this.rebuildButtons();
+        });
+        this.addDrawableChild(this.searchField);
 
-      this.unlockButtons.clear();
-      List<String> filtered = this.getFiltered();
-      int listTop = this.guiY + 90;
-      int listH = 280;
-      int y = listTop + 4 - this.scroll;
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("§f← Powrót"), b -> {
+            MinecraftClient.getInstance().setScreen(this.parent);
+        }).dimensions(guiX + 250 - 60, guiY + GUI_H - 35, 120, 22).build());
 
-      for(Iterator var5 = filtered.iterator(); var5.hasNext(); y += 31) {
-         String name = (String)var5.next();
-         if (y + 28 > listTop && y < listTop + listH) {
-            class_4185 btn = class_4185.method_46430(class_2561.method_43470("§aOdblokuj"), (b) -> {
-               BlacklistTracker.remove(name);
-               this.scroll = Math.max(0, this.scroll - 31);
-               this.rebuildButtons();
-            }).method_46434(this.guiX + 500 - 110, y + 4, 90, 20).method_46431();
-            this.unlockButtons.add(btn);
-            this.method_37063(btn);
-         }
-      }
+        this.rebuildButtons();
+    }
 
-   }
+    private void rebuildButtons() {
+        for (ButtonWidget btn : unlockButtons) {
+            this.remove(btn);
+        }
+        unlockButtons.clear();
 
-   private List<String> getFiltered() {
-      List<String> result = new ArrayList();
-      String q = this.searchQuery.toLowerCase().trim();
-      Iterator var3 = BlacklistTracker.getAll().iterator();
+        List<String> filtered = getFiltered();
+        int listTop = guiY + LIST_TOP_OFFSET;
+        int listH = 280;
+        int y = listTop + 4 - scroll;
 
-      while(true) {
-         String name;
-         do {
-            if (!var3.hasNext()) {
-               return result;
+        for (String name : filtered) {
+            if (y + ENTRY_H > listTop && y < listTop + listH) {
+                ButtonWidget btn = ButtonWidget.builder(Text.literal("§aOdblokuj"), b -> {
+                    BlacklistTracker.remove(name);
+                    this.scroll = Math.max(0, this.scroll - 31);
+                    this.rebuildButtons();
+                }).dimensions(guiX + GUI_W - 110, y + 4, 90, 20).build();
+                unlockButtons.add(btn);
+                this.addDrawableChild(btn);
             }
+            y += 31;
+        }
+    }
 
-            name = (String)var3.next();
-         } while(!q.isEmpty() && !name.toLowerCase().contains(q));
+    private List<String> getFiltered() {
+        List<String> result = new ArrayList<>();
+        String q = searchQuery.toLowerCase().trim();
+        for (String name : BlacklistTracker.getAll()) {
+            if (q.isEmpty() || name.toLowerCase().contains(q)) {
+                result.add(name);
+            }
+        }
+        return result;
+    }
 
-         result.add(name);
-      }
-   }
+    @Override
+    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+        float ease = MathHelper.clamp((float)(System.currentTimeMillis() - openTime) / 250.0F, 0.0F, 1.0F);
+        ease = 1.0F - (1.0F - ease) * (1.0F - ease);
+        int offY = (int)((1.0F - ease) * 20.0F);
+        int gX = guiX;
+        int gY = guiY + offY;
 
-   public void method_25394(class_332 ctx, int mouseX, int mouseY, float delta) {
-      float ease = class_3532.method_15363((float)(System.currentTimeMillis() - this.openTime) / 250.0F, 0.0F, 1.0F);
-      ease = 1.0F - (1.0F - ease) * (1.0F - ease);
-      int offY = (int)((1.0F - ease) * 20.0F);
-      int gX = this.guiX;
-      int gY = this.guiY + offY;
-      this.method_25420(ctx);
-      ctx.method_25294(gX - 1, gY - 1, gX + 500 + 1, gY + 420 + 1, ModSettings.accentColor);
-      ctx.method_25294(gX, gY, gX + 500, gY + 420, -267909104);
-      ctx.method_25294(gX, gY, gX + 500, gY + 48, -15921878);
-      ctx.method_25294(gX, gY + 46, gX + 500, gY + 47, ModSettings.accentColor);
-      ctx.method_27534(this.field_22793, class_2561.method_43470("§c§l⛔ BLACKLIST"), gX + 250, gY + 17, -48060);
-      List<String> filtered = this.getFiltered();
-      class_327 var10001 = this.field_22793;
-      int var10002 = BlacklistTracker.getAll().size();
-      ctx.method_27535(var10001, class_2561.method_43470("§7Zablokowanych: §f" + var10002 + (this.searchQuery.isEmpty() ? "" : "  §8(filtr: " + filtered.size() + ")")), gX + 14, gY + 33, -7829351);
-      this.searchField.method_46419(gY + 55);
-      int listTop = gY + 90;
-      int listH = 280;
-      ctx.method_25294(gX + 10, listTop, gX + 500 - 10, listTop + listH, -16316657);
-      ctx.method_25294(gX + 10, listTop, gX + 500 - 10, listTop + 1, -14013846);
-      ctx.method_44379(gX + 10, listTop, gX + 500 - 10, listTop + listH);
-      if (filtered.isEmpty()) {
-         ctx.method_27534(this.field_22793, class_2561.method_43470(this.searchQuery.isEmpty() ? "§7Brak zablokowanych graczy" : "§7Brak wyników dla: §f" + this.searchQuery), gX + 250, listTop + listH / 2 - 4, -10066313);
-      }
+        this.renderBackground(ctx, mouseX, mouseY, delta);
+        ctx.fill(gX - 1, gY - 1, gX + GUI_W + 1, gY + GUI_H + 1, ModSettings.accentColor);
+        ctx.fill(gX, gY, gX + GUI_W, gY + GUI_H, -267909104);
+        ctx.fill(gX, gY, gX + GUI_W, gY + 48, -15921878);
+        ctx.fill(gX, gY + 46, gX + GUI_W, gY + 47, ModSettings.accentColor);
+        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§c§l⛔ BLACKLIST"), gX + 250, gY + 17, -48060);
 
-      int y = listTop + 4 - this.scroll;
+        List<String> filtered = getFiltered();
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§7Zablokowanych: §f" + BlacklistTracker.getAll().size() +
+            (searchQuery.isEmpty() ? "" : " §8(filtr: " + filtered.size() + ")")), gX + 14, gY + 33, -7829351);
 
-      for(Iterator var13 = filtered.iterator(); var13.hasNext(); y += 31) {
-         String name = (String)var13.next();
-         if (y + 28 > listTop && y < listTop + listH) {
-            ctx.method_25294(gX + 12, y, gX + 500 - 12, y + 28, -16119270);
-            ctx.method_25294(gX + 12, y, gX + 14, y + 28, -3399134);
-            ctx.method_27535(this.field_22793, class_2561.method_43470("§c⛔ §f" + name), gX + 20, y + 14 - 4, -3355427);
-         }
-      }
+        searchField.setY(gY + 55);
+        int listTop = gY + LIST_TOP_OFFSET;
+        int listH = 280;
+        ctx.fill(gX + 10, listTop, gX + GUI_W - 10, listTop + listH, -16316657);
+        ctx.fill(gX + 10, listTop, gX + GUI_W - 10, listTop + 1, -14013846);
+        ctx.enableScissor(gX + 10, listTop, gX + GUI_W - 10, listTop + listH);
 
-      ctx.method_44380();
-      ctx.method_25294(gX + 10, gY + 420 - 45, gX + 500 - 10, gY + 420 - 44, -14540220);
-      super.method_25394(ctx, mouseX, mouseY, delta);
-      this.rebuildButtons();
-   }
+        if (filtered.isEmpty()) {
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(
+                searchQuery.isEmpty() ? "§7Brak zablokowanych graczy" : "§7Brak wyników dla: §f" + searchQuery),
+                gX + 250, listTop + listH / 2 - 4, -10066313);
+        }
 
-   public boolean method_25401(double mouseX, double mouseY, double amount) {
-      this.scroll = Math.max(0, this.scroll - (int)(amount * 15.0D));
-      this.rebuildButtons();
-      return true;
-   }
+        int y = listTop + 4 - scroll;
+        for (String name : filtered) {
+            if (y + ENTRY_H > listTop && y < listTop + listH) {
+                ctx.fill(gX + 12, y, gX + GUI_W - 12, y + ENTRY_H, -16119270);
+                ctx.fill(gX + 12, y, gX + 14, y + ENTRY_H, -3399134);
+                ctx.drawTextWithShadow(textRenderer, Text.literal("§c⛔ §f" + name), gX + 20, y + 14 - 4, -3355427);
+            }
+            y += 31;
+        }
+        ctx.disableScissor();
 
-   public boolean method_25404(int keyCode, int scanCode, int modifiers) {
-      if (keyCode == 256) {
-         class_310.method_1551().method_1507(this.parent);
-         return true;
-      } else {
-         return super.method_25404(keyCode, scanCode, modifiers);
-      }
-   }
+        ctx.fill(gX + 10, gY + GUI_H - 45, gX + GUI_W - 10, gY + GUI_H - 44, -14540220);
+        super.render(ctx, mouseX, mouseY, delta);
+        this.rebuildButtons();
+    }
 
-   public boolean method_25421() {
-      return false;
-   }
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double amount) {
+        this.scroll = Math.max(0, this.scroll - (int)(amount * 15.0D));
+        this.rebuildButtons();
+        return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == 256) {
+            MinecraftClient.getInstance().setScreen(this.parent);
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean shouldPause() {
+        return false;
+    }
 }
