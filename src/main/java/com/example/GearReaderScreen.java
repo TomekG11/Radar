@@ -12,15 +12,15 @@ import net.minecraft.util.math.MathHelper;
 import java.util.*;
 
 public class GearReaderScreen extends Screen {
-    private static final int GUI_W = 860, GUI_H = 480;
+    private static final int GUI_W = 600, GUI_H = 480;
     private Tab currentTab = Tab.PLAYERS;
     private float animProgress = 0.0F;
     private long openTime;
-    private int leftScroll = 0, rightScroll = 0, blacklistScroll = 0, watchlistScroll = 0;
+    private int scroll = 0;
     private int guiX, guiY, panelH, lastMX, lastMY;
 
     public GearReaderScreen() {
-        super(Text.literal("RTP Detector"));
+        super(Text.literal("Gear Reader"));
         openTime = System.currentTimeMillis();
     }
 
@@ -29,7 +29,7 @@ public class GearReaderScreen extends Screen {
         super.init();
         guiX = (width - GUI_W) / 2;
         guiY = (height - GUI_H) / 2;
-        panelH = 408;
+        panelH = 390;
     }
 
     public static void onChatMessage(String message) {
@@ -60,105 +60,141 @@ public class GearReaderScreen extends Screen {
         ctx.fill(gX, gY, gX + GUI_W, gY + GUI_H, -267909104);
         fillGradientH(ctx, gX, gY, GUI_W, 48, -15921878, -15066550);
         ctx.fill(gX, gY + 46, gX + GUI_W, gY + 47, ModSettings.accentColor);
-        int tw = textRenderer.getWidth("RTP DETECTOR");
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§c§lRTP DETECTOR"), gX + 430 - tw / 2, gY + 17, ModSettings.accentColor2);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§7Stone Button Tracker"), gX + 8, gY + 33, -10066313);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§8Oczekujący: §e" + PlayerTracker.getPendingCount()), gX + GUI_W - 130, gY + 33, -10066313);
+        
+        String title = currentTab == Tab.RTP ? "RTP DETECTOR" : "GEAR READER";
+        int tw = textRenderer.getWidth(title);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§b§l" + title), gX + GUI_W/2 - tw/2, gY + 17, ModSettings.accentColor2);
+        
+        // Info
+        int rtpCount = RtpTracker.getCount();
+        String info = "§8Gracze: §f" + PlayerTracker.getCurrentList().size() + "  §8RTP: §c" + rtpCount;
+        ctx.drawTextWithShadow(textRenderer, Text.literal(info), gX + 8, gY + 33, -10066313);
+        
         renderTabBar(ctx, mx, my, gX, gY);
         int pY = gY + 52;
 
-        if (currentTab == Tab.PLAYERS) {
-            renderLeftPanel(ctx, mx, my, gX, pY);
-            renderRightPanel(ctx, mx, my, gX, pY);
-            ctx.fill(gX + 429, gY + 48, gX + 431, gY + GUI_H - 20, -14013846);
-            renderInlineBtn(ctx, "✖ WYCZYŚĆ", GuiButton.Style.RED, gX + 436, gY + GUI_H - 40, 90, 16, hitTest(mx, my, gX + 436, gY + GUI_H - 40, 90, 16));
-        } else if (currentTab == Tab.WATCHLIST) renderWatchlistPanel(ctx, mx, my, gX, pY);
-        else renderBlacklistPanel(ctx, mx, my, gX, pY);
+        switch (currentTab) {
+            case PLAYERS -> renderPlayersPanel(ctx, mx, my, gX, pY);
+            case RTP -> renderRtpPanel(ctx, mx, my, gX, pY);
+            case WATCHLIST -> renderWatchlistPanel(ctx, mx, my, gX, pY);
+            case BLACKLIST -> renderBlacklistPanel(ctx, mx, my, gX, pY);
+        }
 
         ctx.fill(gX, gY + GUI_H - 20, gX + GUI_W, gY + GUI_H, -15592918);
         ctx.fill(gX, gY + GUI_H - 21, gX + GUI_W, gY + GUI_H - 20, -14013846);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7[ §fESC §7- Zamknij ]"), gX + 430, gY + GUI_H - 13, -10066313);
+        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7[ §fESC §7- Zamknij ]"), gX + GUI_W/2, gY + GUI_H - 13, -10066313);
         renderInlineBtn(ctx, "⚙", GuiButton.Style.WHITE, gX + GUI_W - 26, gY + 2, 22, 18, hitTest(mx, my, gX + GUI_W - 26, gY + 2, 22, 18));
     }
 
     private void renderTabBar(DrawContext ctx, int mx, int my, int gX, int gY) {
         int ty = gY + 2;
-        renderInlineBtn(ctx, "🔘 PRZY BUTTONIE", currentTab == Tab.PLAYERS ? GuiButton.Style.BLUE : GuiButton.Style.WHITE, gX + 4, ty, 130, 18, hitTest(mx, my, gX + 4, ty, 130, 18));
-        renderInlineBtn(ctx, "★ WATCHLIST", currentTab == Tab.WATCHLIST ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, gX + 138, ty, 100, 18, hitTest(mx, my, gX + 138, ty, 100, 18));
-        renderInlineBtn(ctx, "⛔ BLACKLIST", currentTab == Tab.BLACKLIST ? GuiButton.Style.RED : GuiButton.Style.WHITE, gX + 242, ty, 100, 18, hitTest(mx, my, gX + 242, ty, 100, 18));
+        int rtpCount = RtpTracker.getCount();
+        String rtpLabel = rtpCount > 0 ? "🚀 RTP (" + rtpCount + ")" : "🚀 RTP";
+        
+        renderInlineBtn(ctx, "👥 GRACZE", currentTab == Tab.PLAYERS ? GuiButton.Style.BLUE : GuiButton.Style.WHITE, gX + 4, ty, 90, 18, hitTest(mx, my, gX + 4, ty, 90, 18));
+        renderInlineBtn(ctx, rtpLabel, currentTab == Tab.RTP ? GuiButton.Style.RED : GuiButton.Style.WHITE, gX + 98, ty, 90, 18, hitTest(mx, my, gX + 98, ty, 90, 18));
+        renderInlineBtn(ctx, "★ WATCH", currentTab == Tab.WATCHLIST ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, gX + 192, ty, 80, 18, hitTest(mx, my, gX + 192, ty, 80, 18));
+        renderInlineBtn(ctx, "⛔ BLOCK", currentTab == Tab.BLACKLIST ? GuiButton.Style.RED : GuiButton.Style.WHITE, gX + 276, ty, 80, 18, hitTest(mx, my, gX + 276, ty, 80, 18));
     }
 
-    private void renderLeftPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
+    private void renderPlayersPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
         List<PlayerData> players = PlayerTracker.getCurrentList();
-        int pX = gX + 6, pW = 418, cBot = pY + panelH;
+        int pX = gX + 6, pW = GUI_W - 12, cTop = pY + 28, cBot = pY + panelH;
+        
         fillGradientH(ctx, pX, pY, pW, 28, -15921878, -15198144);
         ctx.fill(pX, pY + 27, pX + pW, pY + 28, -14013846);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§6§l🔘 KLIKNĘLI BUTTON"), pX + 8, pY + 8, ModSettings.accentColor2);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§f§l👥 GRACZE W ZASIĘGU"), pX + 8, pY + 8, ModSettings.accentColor2);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + players.size() + ")"), pX + pW - textRenderer.getWidth("(" + players.size() + ")") - 6, pY + 8, -10066313);
-        ctx.fill(pX, pY + 28, pX + pW, cBot, -16316657);
-        ctx.enableScissor(pX, pY + 28, pX + pW, cBot);
+        ctx.fill(pX, cTop, pX + pW, cBot, -16316657);
+        ctx.enableScissor(pX, cTop, pX + pW, cBot);
+        
         if (players.isEmpty()) {
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak graczy przy buttonach"), pX + pW / 2, pY + 28 + panelH / 2 - 12, -10066313);
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§8(leather/netherite/trident/custom)"), pX + pW / 2, pY + 28 + panelH / 2 + 2, -12303258);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak graczy w zasięgu"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 12, -10066313);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§8(leather/netherite/trident/custom)"), pX + pW / 2, cTop + (cBot - cTop) / 2 + 2, -12303258);
         }
-        int y = pY + 30 - leftScroll;
+        
+        int y = cTop + 4 - scroll;
         for (PlayerData pd : players) {
-            if (y + 70 > pY + 28 && y < cBot) renderEntry(ctx, pd, pX + 4, y, pW - 8, null, mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, false, 0, 0, pY + 28, cBot);
+            if (y + 70 > cTop && y < cBot) {
+                renderPlayerEntry(ctx, pd, pX + 4, y, pW - 8, null, mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, true, pX, pW, cTop, cBot);
+            }
             y += 74;
         }
         ctx.disableScissor();
     }
 
-    private void renderRightPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
-        List<DisappearedTracker.DisappearedEntry> list = DisappearedTracker.getDisappeared();
-        int pX = gX + 436, pW = 418, cTop = pY + 28, cBot = pY + panelH - 24;
+    private void renderRtpPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
+        List<RtpTracker.RtpEntry> rtpList = RtpTracker.getAll();
+        int pX = gX + 6, pW = GUI_W - 12, cTop = pY + 28, cBot = pY + panelH;
+        
         fillGradientH(ctx, pX, pY, pW, 28, -14021363, -12576744);
         ctx.fill(pX, pY + 27, pX + pW, pY + 28, -7851213);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§c§l🚀 RTP WYKRYTY!"), pX + 8, pY + 8, -48060);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + list.size() + ")"), pX + pW - textRenderer.getWidth("(" + list.size() + ")") - 6, pY + 8, -10066313);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§c§l🚀 RTP WYKRYCI"), pX + 8, pY + 8, -48060);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + rtpList.size() + ")"), pX + pW - textRenderer.getWidth("(" + rtpList.size() + ")") - 6, pY + 8, -10066313);
+        
+        // Przycisk wyczyść
+        int clearX = pX + pW - 100, clearY = pY + 4;
+        renderInlineBtn(ctx, "✖ WYCZYŚĆ", GuiButton.Style.RED, clearX, clearY, 90, 18, hitTest(mx, my, clearX, clearY, 90, 18));
+        
         ctx.fill(pX, cTop, pX + pW, cBot, -16316657);
-        if (list.isEmpty()) { 
-            ctx.enableScissor(pX, cTop, pX + pW, cBot); 
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak wykrytych RTP"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 6, -10066313); 
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§8(gracz musi kliknąć button i zniknąć)"), pX + pW / 2, cTop + (cBot - cTop) / 2 + 6, -12303258);
-            ctx.disableScissor(); 
+        ctx.enableScissor(pX, cTop, pX + pW, cBot);
+        
+        if (rtpList.isEmpty()) {
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak wykrytych RTP"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 12, -10066313);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§8(gracz musi kliknąć button i zniknąć)"), pX + pW / 2, cTop + (cBot - cTop) / 2 + 2, -12303258);
         }
-        int y = pY + 30 - rightScroll;
-        for (DisappearedTracker.DisappearedEntry entry : list) {
-            if (y + 70 > cTop && y < cBot) renderEntry(ctx, entry.data, pX + 4, y, pW - 8, entry.getTimeAgo(), mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, true, pX, pW, cTop, cBot);
+        
+        int y = cTop + 4 - scroll;
+        for (RtpTracker.RtpEntry entry : rtpList) {
+            if (y + 70 > cTop && y < cBot) {
+                renderPlayerEntry(ctx, entry.data, pX + 4, y, pW - 8, entry.getTimeAgo(), mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, true, pX, pW, cTop, cBot);
+            }
             y += 74;
         }
-        ctx.fill(pX, cBot, pX + pW, pY + panelH, -16119270);
-        ctx.fill(pX, cBot - 1, pX + pW, cBot, -14013846);
+        ctx.disableScissor();
     }
 
     private void renderWatchlistPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
         List<WatchlistTracker.WatchlistEntry> all = new ArrayList<>(WatchlistTracker.getAll());
-        int pX = gX + 6, pW = 848, cTop = pY + 28, cBot = pY + panelH;
+        int pX = gX + 6, pW = GUI_W - 12, cTop = pY + 28, cBot = pY + panelH;
+        
         fillGradientH(ctx, pX, pY, pW, 28, -14015232, -12568576);
         ctx.fill(pX, pY + 27, pX + pW, pY + 28, -7838208);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l★ WATCHLIST"), pX + 8, pY + 8, -8960);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + all.size() + ")"), pX + pW - textRenderer.getWidth("(" + all.size() + ")") - 6, pY + 8, -10066313);
         ctx.fill(pX, cTop, pX + pW, cBot, -16316657);
-        if (all.isEmpty()) { ctx.enableScissor(pX, cTop, pX + pW, cBot); ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Watchlist pusta - kliknij §e★§7 przy graczu"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 4, -10066313); ctx.disableScissor(); }
-        int y = pY + 30 - watchlistScroll;
+        ctx.enableScissor(pX, cTop, pX + pW, cBot);
+        
+        if (all.isEmpty()) {
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Watchlist pusta - kliknij §e★§7 przy graczu"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 4, -10066313);
+        }
+        
+        int y = cTop + 4 - scroll;
         for (WatchlistTracker.WatchlistEntry entry : all) {
-            if (y + 70 > cTop && y < cBot) renderWatchlistEntry(ctx, mx, my, entry, pX + 4, y, pW - 8, mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, cTop, cBot);
+            if (y + 70 > cTop && y < cBot) {
+                renderWatchlistEntry(ctx, mx, my, entry, pX + 4, y, pW - 8, mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, cTop, cBot);
+            }
             y += 74;
         }
+        ctx.disableScissor();
     }
 
     private void renderBlacklistPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
         List<String> all = new ArrayList<>(BlacklistTracker.getAll());
-        int pX = gX + 6, pW = 848, entH = 32, cTop = pY + 28, cBot = pY + panelH;
+        int pX = gX + 6, pW = GUI_W - 12, entH = 32, cTop = pY + 28, cBot = pY + panelH;
+        
         fillGradientH(ctx, pX, pY, pW, 28, -14021363, -12576744);
         ctx.fill(pX, pY + 27, pX + pW, pY + 28, -7851213);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§c§l⛔ BLACKLIST"), pX + 8, pY + 8, -48060);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + all.size() + ")"), pX + pW - textRenderer.getWidth("(" + all.size() + ")") - 6, pY + 8, -10066313);
         ctx.fill(pX, cTop, pX + pW, cBot, -16316657);
         ctx.enableScissor(pX, cTop, pX + pW, cBot);
-        if (all.isEmpty()) ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Blacklista jest pusta"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 4, -10066313);
-        int y = pY + 30 - blacklistScroll;
+        
+        if (all.isEmpty()) {
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Blacklista jest pusta"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 4, -10066313);
+        }
+        
+        int y = cTop + 4 - scroll;
         for (String name : all) {
             if (y + entH > cTop && y < cBot) {
                 boolean hov = mx >= pX && mx <= pX + pW && my >= y && my <= y + entH;
@@ -173,127 +209,174 @@ public class GearReaderScreen extends Screen {
         ctx.disableScissor();
     }
 
-    private void renderEntry(DrawContext ctx, PlayerData pd, int x, int y, int w, String timeAgo, boolean hover, boolean showButtons, int pX, int pW, int cTop, int cBot) {
-        ctx.enableScissor(x, cTop, x + w, cBot);
+    private void renderPlayerEntry(DrawContext ctx, PlayerData pd, int x, int y, int w, String timeAgo, boolean hover, boolean showButtons, int pX, int pW, int cTop, int cBot) {
         ctx.fill(x, y, x + w, y + 70, hover ? -15658712 : -16119270);
         ctx.fill(x, y, x + 2, y + 70, ModSettings.accentColor);
         ctx.fill(x, y, x + w, y + 1, -14013846);
         renderHead(ctx, pd, x + 4, y + 3, 26);
         
-        // Nick + typ gracza
         String playerType = ItemChecker.getPlayerType(pd);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l" + pd.name), x + 38, y + 4, -22016);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l" + pd.name + " " + playerType), x + 38, y + 4, -22016);
         
         if (timeAgo != null) {
-            ctx.drawTextWithShadow(textRenderer, Text.literal("§c🚀 RTP " + timeAgo + " " + playerType), x + 38, y + 15, -39356);
+            ctx.drawTextWithShadow(textRenderer, Text.literal("§c🚀 RTP " + timeAgo), x + 38, y + 15, -39356);
+        } else if (pd.nearButton) {
+            ctx.drawTextWithShadow(textRenderer, Text.literal("§6🔘 Przy buttonie..."), x + 38, y + 15, -22016);
         } else {
-            ctx.drawTextWithShadow(textRenderer, Text.literal("§6🔘 Przy buttonie... " + playerType), x + 38, y + 15, -22016);
+            ctx.drawTextWithShadow(textRenderer, Text.literal("§7W zasięgu"), x + 38, y + 15, -10066313);
         }
         
         float hp = pd.health / 2.0F, maxHp = pd.maxHealth / 2.0F, abs = pd.absorption / 2.0F;
         float ratio = maxHp > 0 ? hp / maxHp : 0;
         int hpCol = ratio > 0.6F ? -16711868 : (ratio > 0.3F ? -13312 : -56798);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§c❤"), x + 38, y + 26, hpCol);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§f " + (int)hp + "/" + (int)maxHp + (abs > 0 ? " (+" + (int)abs + ")" : "")), x + 48, y + 26, -3355427);
-        int iY = y + 37, iX = x + 38;
-        renderItemSlot(ctx, pd.helmet, iX, iY); renderItemSlot(ctx, pd.chestplate, iX + 20, iY);
-        renderItemSlot(ctx, pd.leggings, iX + 40, iY); renderItemSlot(ctx, pd.boots, iX + 60, iY);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§c❤ §f" + (int)hp + "/" + (int)maxHp + (abs > 0 ? " §e(+" + (int)abs + ")" : "")), x + 38, y + 26, hpCol);
+        
+        int iY = y + 40, iX = x + 38;
+        renderItemSlot(ctx, pd.helmet, iX, iY); 
+        renderItemSlot(ctx, pd.chestplate, iX + 20, iY);
+        renderItemSlot(ctx, pd.leggings, iX + 40, iY); 
+        renderItemSlot(ctx, pd.boots, iX + 60, iY);
         ctx.fill(iX + 84, iY - 2, iX + 85, iY + 18, -14013846);
-        renderItemSlot(ctx, pd.mainHand, iX + 88, iY); renderItemSlot(ctx, pd.offHand, iX + 108, iY);
-        ctx.disableScissor();
-        if (showButtons) {
-            int btnY = y + 54;
-            if (btnY + 18 > cTop && btnY < cBot) {
-                int bX = pX + pW - 222;
-                boolean watched = WatchlistTracker.isWatched(pd.name);
-                renderInlineBtn(ctx, "TPA", GuiButton.Style.GREEN, bX, btnY, 50, 18, hitTest(lastMX, lastMY, bX, btnY, 50, 18));
-                renderInlineBtn(ctx, "BLOK", GuiButton.Style.RED, bX + 54, btnY, 50, 18, hitTest(lastMX, lastMY, bX + 54, btnY, 50, 18));
-                renderInlineBtn(ctx, "STATS", GuiButton.Style.WHITE, bX + 108, btnY, 50, 18, hitTest(lastMX, lastMY, bX + 108, btnY, 50, 18));
-                renderInlineBtn(ctx, watched ? "★" : "☆", watched ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, bX + 162, btnY, 24, 18, hitTest(lastMX, lastMY, bX + 162, btnY, 24, 18));
-            }
+        renderItemSlot(ctx, pd.mainHand, iX + 88, iY); 
+        renderItemSlot(ctx, pd.offHand, iX + 108, iY);
+        
+        if (showButtons && y + 70 > cTop && y < cBot) {
+            int bX = x + w - 180;
+            int btnY = y + 48;
+            boolean watched = WatchlistTracker.isWatched(pd.name);
+            renderInlineBtn(ctx, "TPA", GuiButton.Style.GREEN, bX, btnY, 40, 18, hitTest(lastMX, lastMY, bX, btnY, 40, 18));
+            renderInlineBtn(ctx, "⛔", GuiButton.Style.RED, bX + 44, btnY, 24, 18, hitTest(lastMX, lastMY, bX + 44, btnY, 24, 18));
+            renderInlineBtn(ctx, "STATS", GuiButton.Style.WHITE, bX + 72, btnY, 50, 18, hitTest(lastMX, lastMY, bX + 72, btnY, 50, 18));
+            renderInlineBtn(ctx, watched ? "★" : "☆", watched ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, bX + 126, btnY, 24, 18, hitTest(lastMX, lastMY, bX + 126, btnY, 24, 18));
         }
     }
 
     private void renderWatchlistEntry(DrawContext ctx, int mx, int my, WatchlistTracker.WatchlistEntry entry, int x, int y, int w, boolean hover, int cTop, int cBot) {
-        ctx.enableScissor(x, cTop, x + w, cBot);
         ctx.fill(x, y, x + w, y + 70, hover ? -15658712 : -16119270);
         ctx.fill(x, y, x + 2, y + 70, -22016);
         ctx.fill(x, y, x + w, y + 1, -10075136);
         renderHead(ctx, entry.data, x + 4, y + 3, 26);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l" + entry.data.name), x + 38, y + 4, -8960);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§7" + entry.getTimeAgo() + " " + ItemChecker.getPlayerType(entry.data)), x + 38, y + 15, -10066313);
+        
+        String playerType = ItemChecker.getPlayerType(entry.data);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l" + entry.data.name + " " + playerType), x + 38, y + 4, -8960);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§7Dodano: " + entry.getTimeAgo()), x + 38, y + 15, -10066313);
+        
         float hp = entry.data.health / 2.0F, maxHp = entry.data.maxHealth / 2.0F, abs = entry.data.absorption / 2.0F;
         float ratio = maxHp > 0 ? hp / maxHp : 0;
         int hpCol = ratio > 0.6F ? -16711868 : (ratio > 0.3F ? -13312 : -56798);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§c❤"), x + 38, y + 26, hpCol);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§f " + (int)hp + "/" + (int)maxHp + (abs > 0 ? " (+" + (int)abs + ")" : "")), x + 48, y + 26, -3355427);
-        int iY = y + 37, iX = x + 38;
-        renderItemSlot(ctx, entry.data.helmet, iX, iY); renderItemSlot(ctx, entry.data.chestplate, iX + 20, iY);
-        renderItemSlot(ctx, entry.data.leggings, iX + 40, iY); renderItemSlot(ctx, entry.data.boots, iX + 60, iY);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§c❤ §f" + (int)hp + "/" + (int)maxHp + (abs > 0 ? " §e(+" + (int)abs + ")" : "")), x + 38, y + 26, hpCol);
+        
+        int iY = y + 40, iX = x + 38;
+        renderItemSlot(ctx, entry.data.helmet, iX, iY); 
+        renderItemSlot(ctx, entry.data.chestplate, iX + 20, iY);
+        renderItemSlot(ctx, entry.data.leggings, iX + 40, iY); 
+        renderItemSlot(ctx, entry.data.boots, iX + 60, iY);
         ctx.fill(iX + 84, iY - 2, iX + 85, iY + 18, -14013846);
-        renderItemSlot(ctx, entry.data.mainHand, iX + 88, iY); renderItemSlot(ctx, entry.data.offHand, iX + 108, iY);
-        ctx.disableScissor();
-        int btnY = y + 54;
-        if (btnY + 18 > cTop && btnY < cBot) {
-            int btnX = x + w - 186;
-            renderInlineBtn(ctx, "TPA", GuiButton.Style.GREEN, btnX, btnY, 50, 18, hitTest(mx, my, btnX, btnY, 50, 18));
-            renderInlineBtn(ctx, "STATS", GuiButton.Style.WHITE, btnX + 54, btnY, 50, 18, hitTest(mx, my, btnX + 54, btnY, 50, 18));
-            renderInlineBtn(ctx, "★ USUŃ", GuiButton.Style.ORANGE, btnX + 108, btnY, 70, 18, hitTest(mx, my, btnX + 108, btnY, 70, 18));
-        }
+        renderItemSlot(ctx, entry.data.mainHand, iX + 88, iY); 
+        renderItemSlot(ctx, entry.data.offHand, iX + 108, iY);
+        
+        int btnY = y + 48;
+        int btnX = x + w - 150;
+        renderInlineBtn(ctx, "TPA", GuiButton.Style.GREEN, btnX, btnY, 40, 18, hitTest(mx, my, btnX, btnY, 40, 18));
+        renderInlineBtn(ctx, "STATS", GuiButton.Style.WHITE, btnX + 44, btnY, 50, 18, hitTest(mx, my, btnX + 44, btnY, 50, 18));
+        renderInlineBtn(ctx, "✖ USUŃ", GuiButton.Style.ORANGE, btnX + 98, btnY, 50, 18, hitTest(mx, my, btnX + 98, btnY, 50, 18));
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int mx = (int) mouseX, my = (int) mouseY, gX = guiX, gY = guiY, pY = gY + 52;
-        if (hitTest(mx, my, gX + GUI_W - 26, gY + 2, 22, 18)) { MinecraftClient.getInstance().setScreen(new SettingsScreen(this)); return true; }
-        if (hitTest(mx, my, gX + 4, gY + 2, 130, 18)) { currentTab = Tab.PLAYERS; return true; }
-        if (hitTest(mx, my, gX + 138, gY + 2, 100, 18)) { currentTab = Tab.WATCHLIST; return true; }
-        if (hitTest(mx, my, gX + 242, gY + 2, 100, 18)) { currentTab = Tab.BLACKLIST; return true; }
+        
+        // Settings
+        if (hitTest(mx, my, gX + GUI_W - 26, gY + 2, 22, 18)) { 
+            MinecraftClient.getInstance().setScreen(new SettingsScreen(this)); 
+            return true; 
+        }
+        
+        // Tabs
+        if (hitTest(mx, my, gX + 4, gY + 2, 90, 18)) { currentTab = Tab.PLAYERS; scroll = 0; return true; }
+        if (hitTest(mx, my, gX + 98, gY + 2, 90, 18)) { currentTab = Tab.RTP; scroll = 0; return true; }
+        if (hitTest(mx, my, gX + 192, gY + 2, 80, 18)) { currentTab = Tab.WATCHLIST; scroll = 0; return true; }
+        if (hitTest(mx, my, gX + 276, gY + 2, 80, 18)) { currentTab = Tab.BLACKLIST; scroll = 0; return true; }
+
+        int pX = gX + 6, pW = GUI_W - 12, cTop = pY + 28, cBot = pY + panelH;
 
         if (currentTab == Tab.PLAYERS) {
-            // Przycisk WYCZYŚĆ - resetuje wszystko
-            if (hitTest(mx, my, gX + 436, gY + GUI_H - 40, 90, 16)) { 
-                DisappearedTracker.clearAll(); 
-                leftScroll = 0;
-                rightScroll = 0;
+            List<PlayerData> players = PlayerTracker.getCurrentList();
+            int y = cTop + 4 - scroll;
+            for (PlayerData pd : players) {
+                if (y + 70 > cTop && y < cBot) {
+                    int bX = pX + 4 + (pW - 8) - 180;
+                    int btnY = y + 48;
+                    if (hitTest(mx, my, bX, btnY, 40, 18)) { sendCommand("tpa " + pd.name); return true; }
+                    if (hitTest(mx, my, bX + 44, btnY, 24, 18)) { BlacklistTracker.add(pd.name); return true; }
+                    if (hitTest(mx, my, bX + 72, btnY, 50, 18)) { sendCommand("stats " + pd.name); close(); return true; }
+                    if (hitTest(mx, my, bX + 126, btnY, 24, 18)) { toggleWatchlist(pd); return true; }
+                }
+                y += 74;
+            }
+        } else if (currentTab == Tab.RTP) {
+            // Przycisk wyczyść
+            int clearX = pX + pW - 100, clearY = pY + 4;
+            if (hitTest(mx, my, clearX, clearY, 90, 18)) { 
+                RtpTracker.clearAll(); 
+                scroll = 0;
                 return true; 
             }
-            int rpX = gX + 436, rpW = 418, cTop = pY + 28, cBot = pY + panelH - 24;
-            int y = pY + 30 - rightScroll;
-            for (DisappearedTracker.DisappearedEntry entry : DisappearedTracker.getDisappeared()) {
-                int btnY = y + 54;
-                if (btnY + 18 > cTop && btnY < cBot) {
-                    int bX = rpX + rpW - 222;
-                    if (hitTest(mx, my, bX, btnY, 50, 18)) { if (MinecraftClient.getInstance().player != null) MinecraftClient.getInstance().player.networkHandler.sendChatCommand("tpa " + entry.data.name); return true; }
-                    if (hitTest(mx, my, bX + 54, btnY, 50, 18)) { BlacklistTracker.add(entry.data.name); DisappearedTracker.remove(entry.data.name); return true; }
-                    if (hitTest(mx, my, bX + 108, btnY, 50, 18)) { if (MinecraftClient.getInstance().player != null) { MinecraftClient.getInstance().player.networkHandler.sendChatCommand("stats " + entry.data.name); MinecraftClient.getInstance().setScreen(null); } return true; }
-                    if (hitTest(mx, my, bX + 162, btnY, 24, 18)) { if (WatchlistTracker.isWatched(entry.data.name)) WatchlistTracker.remove(entry.data.name); else WatchlistTracker.add(entry.data); return true; }
+            
+            List<RtpTracker.RtpEntry> rtpList = RtpTracker.getAll();
+            int y = cTop + 4 - scroll;
+            for (RtpTracker.RtpEntry entry : rtpList) {
+                if (y + 70 > cTop && y < cBot) {
+                    int bX = pX + 4 + (pW - 8) - 180;
+                    int btnY = y + 48;
+                    if (hitTest(mx, my, bX, btnY, 40, 18)) { sendCommand("tpa " + entry.data.name); return true; }
+                    if (hitTest(mx, my, bX + 44, btnY, 24, 18)) { BlacklistTracker.add(entry.data.name); RtpTracker.remove(entry.data.name); return true; }
+                    if (hitTest(mx, my, bX + 72, btnY, 50, 18)) { sendCommand("stats " + entry.data.name); close(); return true; }
+                    if (hitTest(mx, my, bX + 126, btnY, 24, 18)) { toggleWatchlist(entry.data); return true; }
                 }
                 y += 74;
             }
         } else if (currentTab == Tab.WATCHLIST) {
-            int wpX = gX + 6, wpW = 848, wCTop = pY + 28, wCBot = pY + panelH;
-            int wy = pY + 30 - watchlistScroll;
-            for (WatchlistTracker.WatchlistEntry entry : new ArrayList<>(WatchlistTracker.getAll())) {
-                int btnY = wy + 54;
-                if (btnY + 18 > wCTop && btnY < wCBot) {
-                    int btnX = wpX + 4 + (wpW - 8) - 186;
-                    if (hitTest(mx, my, btnX, btnY, 50, 18)) { if (MinecraftClient.getInstance().player != null) MinecraftClient.getInstance().player.networkHandler.sendChatCommand("tpa " + entry.data.name); return true; }
-                    if (hitTest(mx, my, btnX + 54, btnY, 50, 18)) { if (MinecraftClient.getInstance().player != null) { MinecraftClient.getInstance().player.networkHandler.sendChatCommand("stats " + entry.data.name); MinecraftClient.getInstance().setScreen(null); } return true; }
-                    if (hitTest(mx, my, btnX + 108, btnY, 70, 18)) { WatchlistTracker.remove(entry.data.name); return true; }
+            List<WatchlistTracker.WatchlistEntry> all = new ArrayList<>(WatchlistTracker.getAll());
+            int y = cTop + 4 - scroll;
+            for (WatchlistTracker.WatchlistEntry entry : all) {
+                if (y + 70 > cTop && y < cBot) {
+                    int btnX = pX + 4 + (pW - 8) - 150;
+                    int btnY = y + 48;
+                    if (hitTest(mx, my, btnX, btnY, 40, 18)) { sendCommand("tpa " + entry.data.name); return true; }
+                    if (hitTest(mx, my, btnX + 44, btnY, 50, 18)) { sendCommand("stats " + entry.data.name); close(); return true; }
+                    if (hitTest(mx, my, btnX + 98, btnY, 50, 18)) { WatchlistTracker.remove(entry.data.name); return true; }
                 }
-                wy += 74;
+                y += 74;
             }
         } else if (currentTab == Tab.BLACKLIST) {
-            int bpX = gX + 6, bpW = 848, entH = 32, bCTop = pY + 28, bCBot = pY + panelH;
-            int by = pY + 30 - blacklistScroll;
-            for (String name : new ArrayList<>(BlacklistTracker.getAll())) {
-                if (by + entH > bCTop && by < bCBot && hitTest(mx, my, bpX + bpW - 100, by + 6, 90, 20)) { BlacklistTracker.remove(name); return true; }
-                by += entH + 4;
+            List<String> all = new ArrayList<>(BlacklistTracker.getAll());
+            int entH = 32;
+            int y = cTop + 4 - scroll;
+            for (String name : all) {
+                if (y + entH > cTop && y < cBot && hitTest(mx, my, pX + pW - 100, y + 6, 90, 20)) { 
+                    BlacklistTracker.remove(name); 
+                    return true; 
+                }
+                y += entH + 4;
             }
         }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+    
+    private void sendCommand(String cmd) {
+        if (MinecraftClient.getInstance().player != null) {
+            MinecraftClient.getInstance().player.networkHandler.sendChatCommand(cmd);
+        }
+    }
+    
+    private void toggleWatchlist(PlayerData pd) {
+        if (WatchlistTracker.isWatched(pd.name)) {
+            WatchlistTracker.remove(pd.name);
+        } else {
+            WatchlistTracker.add(pd);
+        }
     }
 
     private void renderHead(DrawContext ctx, PlayerData pd, int x, int y, int size) {
@@ -319,7 +402,6 @@ public class GearReaderScreen extends Screen {
 
     private void renderItemSlot(DrawContext ctx, ItemStack stack, int x, int y) {
         if (stack != null && !stack.isEmpty()) {
-            // Podświetl specjalne itemy
             if (ItemChecker.isNetherite(stack)) {
                 ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x55AA00AA);
             } else if (ItemChecker.isLeatherArmor(stack)) {
@@ -332,7 +414,6 @@ public class GearReaderScreen extends Screen {
             ctx.drawItem(stack, x, y);
         } else {
             ctx.fill(x, y, x + 16, y + 16, -15921894);
-            if (!ModSettings.performanceMode) { ctx.fill(x, y, x + 16, y + 1, -14013846); ctx.fill(x, y, x + 1, y + 16, -14013846); }
         }
     }
 
@@ -365,10 +446,7 @@ public class GearReaderScreen extends Screen {
     private boolean hitTest(int mx, int my, int x, int y, int w, int h) { return mx >= x && mx <= x + w && my >= y && my <= y + h; }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (currentTab == Tab.BLACKLIST) blacklistScroll = Math.max(0, blacklistScroll - (int)(amount * 15));
-        else if (currentTab == Tab.WATCHLIST) watchlistScroll = Math.max(0, watchlistScroll - (int)(amount * 15));
-        else if (mouseX < guiX + 430) leftScroll = Math.max(0, leftScroll - (int)(amount * 18));
-        else rightScroll = Math.max(0, rightScroll - (int)(amount * 18));
+        scroll = Math.max(0, scroll - (int)(amount * 20));
         return true;
     }
 
@@ -380,5 +458,6 @@ public class GearReaderScreen extends Screen {
 
     @Override
     public boolean shouldPause() { return false; }
-    private enum Tab { PLAYERS, WATCHLIST, BLACKLIST }
+    
+    private enum Tab { PLAYERS, RTP, WATCHLIST, BLACKLIST }
 }
