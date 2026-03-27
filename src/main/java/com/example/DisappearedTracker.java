@@ -7,9 +7,7 @@ public class DisappearedTracker {
 
     public static void update(List<PlayerData> currentVisible) {
         Set<String> currentNames = new HashSet<>();
-        for (PlayerData pd : currentVisible) {
-            currentNames.add(pd.name);
-        }
+        for (PlayerData pd : currentVisible) currentNames.add(pd.name);
         disappeared.entrySet().removeIf(e -> currentNames.contains(e.getKey()));
     }
 
@@ -19,17 +17,9 @@ public class DisappearedTracker {
         }
     }
 
-    public static Collection<DisappearedEntry> getDisappeared() {
-        return disappeared.values();
-    }
-
-    public static void remove(String name) {
-        disappeared.remove(name);
-    }
-
-    public static void clearAll() {
-        disappeared.clear();
-    }
+    public static Collection<DisappearedEntry> getDisappeared() { return disappeared.values(); }
+    public static void remove(String name) { disappeared.remove(name); }
+    public static void clearAll() { disappeared.clear(); }
 
     public static class DisappearedEntry {
         public final PlayerData data;
@@ -41,14 +31,13 @@ public class DisappearedTracker {
         }
 
         public String getTimeAgo() {
-            long seconds = (System.currentTimeMillis() - this.disappearedAt) / 1000L;
-            if (seconds < 60L) return seconds + "s temu";
-            long minutes = seconds / 60L;
-            if (minutes < 60L) return minutes + "min temu";
-            long hours = minutes / 60L;
-            if (hours < 24L) return hours + "h temu";
-            long days = hours / 24L;
-            return days + "d temu";
+            long s = (System.currentTimeMillis() - disappearedAt) / 1000L;
+            if (s < 60L) return s + "s temu";
+            long m = s / 60L;
+            if (m < 60L) return m + "min temu";
+            long h = m / 60L;
+            if (h < 24L) return h + "h temu";
+            return (h / 24L) + "d temu";
         }
     }
 }
