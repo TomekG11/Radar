@@ -23,8 +23,11 @@ public class PlayerData {
     // RTP tracking
     public boolean nearButton = false;
     public long lastSeenNearButton = 0;
+    public long detectedAt = 0;
 
     public PlayerData(PlayerEntity player) {
+        this.detectedAt = System.currentTimeMillis();
+        
         if (player == null) {
             this.name = "";
             this.uuid = "";
