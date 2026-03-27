@@ -20,7 +20,7 @@ public class GearReaderScreen extends Screen {
     private int guiX, guiY, panelH, lastMX, lastMY;
 
     public GearReaderScreen() {
-        super(Text.literal("UkrainskiReader"));
+        super(Text.literal("RTP Detector"));
         openTime = System.currentTimeMillis();
     }
 
@@ -63,7 +63,7 @@ public class GearReaderScreen extends Screen {
         int tw = textRenderer.getWidth("RTP DETECTOR");
         ctx.drawTextWithShadow(textRenderer, Text.literal("§c§lRTP DETECTOR"), gX + 430 - tw / 2, gY + 17, ModSettings.accentColor2);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7Stone Button Tracker"), gX + 8, gY + 33, -10066313);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§8Pending: §e" + PlayerTracker.getPendingCount()), gX + GUI_W - 120, gY + 33, -10066313);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§8Oczekujący: §e" + PlayerTracker.getPendingCount()), gX + GUI_W - 130, gY + 33, -10066313);
         renderTabBar(ctx, mx, my, gX, gY);
         int pY = gY + 52;
 
@@ -83,9 +83,9 @@ public class GearReaderScreen extends Screen {
 
     private void renderTabBar(DrawContext ctx, int mx, int my, int gX, int gY) {
         int ty = gY + 2;
-        renderInlineBtn(ctx, "PRZY BUTTONIE", currentTab == Tab.PLAYERS ? GuiButton.Style.BLUE : GuiButton.Style.WHITE, gX + 4, ty, 110, 18, hitTest(mx, my, gX + 4, ty, 110, 18));
-        renderInlineBtn(ctx, "★ WATCHLIST", currentTab == Tab.WATCHLIST ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, gX + 118, ty, 110, 18, hitTest(mx, my, gX + 118, ty, 110, 18));
-        renderInlineBtn(ctx, "⛔ BLACKLIST", currentTab == Tab.BLACKLIST ? GuiButton.Style.RED : GuiButton.Style.WHITE, gX + 232, ty, 110, 18, hitTest(mx, my, gX + 232, ty, 110, 18));
+        renderInlineBtn(ctx, "🔘 PRZY BUTTONIE", currentTab == Tab.PLAYERS ? GuiButton.Style.BLUE : GuiButton.Style.WHITE, gX + 4, ty, 130, 18, hitTest(mx, my, gX + 4, ty, 130, 18));
+        renderInlineBtn(ctx, "★ WATCHLIST", currentTab == Tab.WATCHLIST ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, gX + 138, ty, 100, 18, hitTest(mx, my, gX + 138, ty, 100, 18));
+        renderInlineBtn(ctx, "⛔ BLACKLIST", currentTab == Tab.BLACKLIST ? GuiButton.Style.RED : GuiButton.Style.WHITE, gX + 242, ty, 100, 18, hitTest(mx, my, gX + 242, ty, 100, 18));
     }
 
     private void renderLeftPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
@@ -93,11 +93,14 @@ public class GearReaderScreen extends Screen {
         int pX = gX + 6, pW = 418, cBot = pY + panelH;
         fillGradientH(ctx, pX, pY, pW, 28, -15921878, -15198144);
         ctx.fill(pX, pY + 27, pX + pW, pY + 28, -14013846);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§6§l🔘 PRZY STONE BUTTON"), pX + 8, pY + 8, ModSettings.accentColor2);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§6§l🔘 KLIKNĘLI BUTTON"), pX + 8, pY + 8, ModSettings.accentColor2);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + players.size() + ")"), pX + pW - textRenderer.getWidth("(" + players.size() + ")") - 6, pY + 8, -10066313);
         ctx.fill(pX, pY + 28, pX + pW, cBot, -16316657);
         ctx.enableScissor(pX, pY + 28, pX + pW, cBot);
-        if (players.isEmpty()) ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak graczy przy buttonach"), pX + pW / 2, pY + 28 + panelH / 2 - 4, -10066313);
+        if (players.isEmpty()) {
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak graczy przy buttonach"), pX + pW / 2, pY + 28 + panelH / 2 - 12, -10066313);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§8(leather/netherite/trident/custom)"), pX + pW / 2, pY + 28 + panelH / 2 + 2, -12303258);
+        }
         int y = pY + 30 - leftScroll;
         for (PlayerData pd : players) {
             if (y + 70 > pY + 28 && y < cBot) renderEntry(ctx, pd, pX + 4, y, pW - 8, null, mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, false, 0, 0, pY + 28, cBot);
@@ -107,14 +110,19 @@ public class GearReaderScreen extends Screen {
     }
 
     private void renderRightPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
-        List<DisappearedTracker.DisappearedEntry> list = new ArrayList<>(DisappearedTracker.getDisappeared());
+        List<DisappearedTracker.DisappearedEntry> list = DisappearedTracker.getDisappeared();
         int pX = gX + 436, pW = 418, cTop = pY + 28, cBot = pY + panelH - 24;
         fillGradientH(ctx, pX, pY, pW, 28, -14021363, -12576744);
         ctx.fill(pX, pY + 27, pX + pW, pY + 28, -7851213);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§c§l🚀 RTP WYKRYTY!"), pX + 8, pY + 8, -48060);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + list.size() + ")"), pX + pW - textRenderer.getWidth("(" + list.size() + ")") - 6, pY + 8, -10066313);
         ctx.fill(pX, cTop, pX + pW, cBot, -16316657);
-        if (list.isEmpty()) { ctx.enableScissor(pX, cTop, pX + pW, cBot); ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak wykrytych RTP"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 4, -10066313); ctx.disableScissor(); }
+        if (list.isEmpty()) { 
+            ctx.enableScissor(pX, cTop, pX + pW, cBot); 
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak wykrytych RTP"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 6, -10066313); 
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§8(gracz musi kliknąć button i zniknąć)"), pX + pW / 2, cTop + (cBot - cTop) / 2 + 6, -12303258);
+            ctx.disableScissor(); 
+        }
         int y = pY + 30 - rightScroll;
         for (DisappearedTracker.DisappearedEntry entry : list) {
             if (y + 70 > cTop && y < cBot) renderEntry(ctx, entry.data, pX + 4, y, pW - 8, entry.getTimeAgo(), mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, true, pX, pW, cTop, cBot);
@@ -171,12 +179,15 @@ public class GearReaderScreen extends Screen {
         ctx.fill(x, y, x + 2, y + 70, ModSettings.accentColor);
         ctx.fill(x, y, x + w, y + 1, -14013846);
         renderHead(ctx, pd, x + 4, y + 3, 26);
+        
+        // Nick + typ gracza
+        String playerType = ItemChecker.getPlayerType(pd);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l" + pd.name), x + 38, y + 4, -22016);
         
         if (timeAgo != null) {
-            ctx.drawTextWithShadow(textRenderer, Text.literal("§c🚀 RTP " + timeAgo), x + 38, y + 15, -39356);
+            ctx.drawTextWithShadow(textRenderer, Text.literal("§c🚀 RTP " + timeAgo + " " + playerType), x + 38, y + 15, -39356);
         } else {
-            ctx.drawTextWithShadow(textRenderer, Text.literal("§6🔘 Przy buttonie..."), x + 38, y + 15, -22016);
+            ctx.drawTextWithShadow(textRenderer, Text.literal("§6🔘 Przy buttonie... " + playerType), x + 38, y + 15, -22016);
         }
         
         float hp = pd.health / 2.0F, maxHp = pd.maxHealth / 2.0F, abs = pd.absorption / 2.0F;
@@ -210,7 +221,7 @@ public class GearReaderScreen extends Screen {
         ctx.fill(x, y, x + w, y + 1, -10075136);
         renderHead(ctx, entry.data, x + 4, y + 3, 26);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l" + entry.data.name), x + 38, y + 4, -8960);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§7" + entry.getTimeAgo()), x + 38, y + 15, -10066313);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§7" + entry.getTimeAgo() + " " + ItemChecker.getPlayerType(entry.data)), x + 38, y + 15, -10066313);
         float hp = entry.data.health / 2.0F, maxHp = entry.data.maxHealth / 2.0F, abs = entry.data.absorption / 2.0F;
         float ratio = maxHp > 0 ? hp / maxHp : 0;
         int hpCol = ratio > 0.6F ? -16711868 : (ratio > 0.3F ? -13312 : -56798);
@@ -236,15 +247,21 @@ public class GearReaderScreen extends Screen {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int mx = (int) mouseX, my = (int) mouseY, gX = guiX, gY = guiY, pY = gY + 52;
         if (hitTest(mx, my, gX + GUI_W - 26, gY + 2, 22, 18)) { MinecraftClient.getInstance().setScreen(new SettingsScreen(this)); return true; }
-        if (hitTest(mx, my, gX + 4, gY + 2, 110, 18)) { currentTab = Tab.PLAYERS; return true; }
-        if (hitTest(mx, my, gX + 118, gY + 2, 110, 18)) { currentTab = Tab.WATCHLIST; return true; }
-        if (hitTest(mx, my, gX + 232, gY + 2, 110, 18)) { currentTab = Tab.BLACKLIST; return true; }
+        if (hitTest(mx, my, gX + 4, gY + 2, 130, 18)) { currentTab = Tab.PLAYERS; return true; }
+        if (hitTest(mx, my, gX + 138, gY + 2, 100, 18)) { currentTab = Tab.WATCHLIST; return true; }
+        if (hitTest(mx, my, gX + 242, gY + 2, 100, 18)) { currentTab = Tab.BLACKLIST; return true; }
 
         if (currentTab == Tab.PLAYERS) {
-            if (hitTest(mx, my, gX + 436, gY + GUI_H - 40, 90, 16)) { DisappearedTracker.clearAll(); return true; }
+            // Przycisk WYCZYŚĆ - resetuje wszystko
+            if (hitTest(mx, my, gX + 436, gY + GUI_H - 40, 90, 16)) { 
+                DisappearedTracker.clearAll(); 
+                leftScroll = 0;
+                rightScroll = 0;
+                return true; 
+            }
             int rpX = gX + 436, rpW = 418, cTop = pY + 28, cBot = pY + panelH - 24;
             int y = pY + 30 - rightScroll;
-            for (DisappearedTracker.DisappearedEntry entry : new ArrayList<>(DisappearedTracker.getDisappeared())) {
+            for (DisappearedTracker.DisappearedEntry entry : DisappearedTracker.getDisappeared()) {
                 int btnY = y + 54;
                 if (btnY + 18 > cTop && btnY < cBot) {
                     int bX = rpX + rpW - 222;
@@ -302,6 +319,16 @@ public class GearReaderScreen extends Screen {
 
     private void renderItemSlot(DrawContext ctx, ItemStack stack, int x, int y) {
         if (stack != null && !stack.isEmpty()) {
+            // Podświetl specjalne itemy
+            if (ItemChecker.isNetherite(stack)) {
+                ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x55AA00AA);
+            } else if (ItemChecker.isLeatherArmor(stack)) {
+                ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x55FFAA00);
+            } else if (ItemChecker.isTrident(stack)) {
+                ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x5500AAFF);
+            } else if (ItemChecker.hasCustomModelData(stack)) {
+                ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x55FF00FF);
+            }
             ctx.drawItem(stack, x, y);
         } else {
             ctx.fill(x, y, x + 16, y + 16, -15921894);
