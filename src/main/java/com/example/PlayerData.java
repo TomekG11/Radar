@@ -1,56 +1,56 @@
 package com.example;
 
-import net.minecraft.class_1657;
-import net.minecraft.class_1799;
-import net.minecraft.class_5134;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.entity.attribute.EntityAttributes;
 
 public class PlayerData {
     public String name;
     public String uuid;
-    public class_1799 helmet;
-    public class_1799 chestplate;
-    public class_1799 leggings;
-    public class_1799 boots;
-    public class_1799 mainHand;
-    public class_1799 offHand;
-    public class_1657 entity;
+    public ItemStack helmet;
+    public ItemStack chestplate;
+    public ItemStack leggings;
+    public ItemStack boots;
+    public ItemStack mainHand;
+    public ItemStack offHand;
+    public PlayerEntity entity;
     public float health;
     public float maxHealth;
     public float absorption;
     public int armor;
     public float armorToughness;
 
-    public PlayerData(class_1657 player) {
+    public PlayerData(PlayerEntity player) {
         if (player == null) {
             this.name = "";
             this.uuid = "";
             this.entity = null;
-            this.helmet = class_1799.field_8037;
-            this.chestplate = class_1799.field_8037;
-            this.leggings = class_1799.field_8037;
-            this.boots = class_1799.field_8037;
-            this.mainHand = class_1799.field_8037;
-            this.offHand = class_1799.field_8037;
+            this.helmet = ItemStack.EMPTY;
+            this.chestplate = ItemStack.EMPTY;
+            this.leggings = ItemStack.EMPTY;
+            this.boots = ItemStack.EMPTY;
+            this.mainHand = ItemStack.EMPTY;
+            this.offHand = ItemStack.EMPTY;
             this.health = 0.0F;
             this.maxHealth = 20.0F;
             this.absorption = 0.0F;
             this.armor = 0;
             this.armorToughness = 0.0F;
         } else {
-            this.name = player.method_5477().getString();
-            this.uuid = player.method_5845();
+            this.name = player.getName().getString();
+            this.uuid = player.getUuidAsString();
             this.entity = player;
-            this.helmet = player.method_31548().method_7372(3).method_7972();
-            this.chestplate = player.method_31548().method_7372(2).method_7972();
-            this.leggings = player.method_31548().method_7372(1).method_7972();
-            this.boots = player.method_31548().method_7372(0).method_7972();
-            this.mainHand = player.method_6047().method_7972();
-            this.offHand = player.method_6079().method_7972();
-            this.health = player.method_6032();
-            this.maxHealth = player.method_6063();
-            this.absorption = player.method_6067();
-            this.armor = player.method_6096();
-            this.armorToughness = (float)player.method_26825(class_5134.field_23725);
+            this.helmet = player.getInventory().getArmorStack(3).copy();
+            this.chestplate = player.getInventory().getArmorStack(2).copy();
+            this.leggings = player.getInventory().getArmorStack(1).copy();
+            this.boots = player.getInventory().getArmorStack(0).copy();
+            this.mainHand = player.getMainHandStack().copy();
+            this.offHand = player.getOffHandStack().copy();
+            this.health = player.getHealth();
+            this.maxHealth = player.getMaxHealth();
+            this.absorption = player.getAbsorptionAmount();
+            this.armor = player.getArmor();
+            this.armorToughness = (float) player.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
         }
     }
 }
