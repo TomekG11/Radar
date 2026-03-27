@@ -54,7 +54,7 @@ public class GearReaderScreen extends Screen {
     }
 
     private void renderMain(DrawContext ctx, int mx, int my, int gX, int gY) {
-        if (!ModSettings.performanceMode) { renderBackground(ctx, mx, my, 0); drawBorderGlow(ctx, gX - 2, gY - 2, GUI_W + 4, GUI_H + 4); }
+        if (!ModSettings.performanceMode) { renderBackground(ctx); drawBorderGlow(ctx, gX - 2, gY - 2, GUI_W + 4, GUI_H + 4); }
         else ctx.fill(0, 0, width, height, -1442840576);
 
         ctx.fill(gX, gY, gX + GUI_W, gY + GUI_H, -267909104);
@@ -282,7 +282,7 @@ public class GearReaderScreen extends Screen {
             try {
                 MinecraftClient client = MinecraftClient.getInstance();
                 Identifier skin = null;
-                if (client.getNetworkHandler() != null) for (PlayerListEntry entry : client.getNetworkHandler().getPlayerList()) if (entry.getProfile().getName().equals(pd.name)) { skin = entry.getSkinTextures().texture(); break; }
+                if (client.getNetworkHandler() != null) for (PlayerListEntry entry : client.getNetworkHandler().getPlayerList()) if (entry.getProfile().getName().equals(pd.name)) { skin = entry.getSkinTexture(); break; }
                 if (skin == null) skin = new Identifier("textures/entity/player/wide/steve.png");
                 ctx.fill(x - 2, y - 2, x + size + 2, y + size + 2, ModSettings.accentColor);
                 ctx.fill(x - 1, y - 1, x + size + 1, y + size + 1, -16448240);
@@ -336,8 +336,7 @@ public class GearReaderScreen extends Screen {
     private int addAlpha(int color, int alpha) { return alpha << 24 | (color & 16777215); }
     private boolean hitTest(int mx, int my, int x, int y, int w, int h) { return mx >= x && mx <= x + w && my >= y && my <= y + h; }
 
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (currentTab == Tab.BLACKLIST) blacklistScroll = Math.max(0, blacklistScroll - (int)(amount * 15));
         else if (currentTab == Tab.WATCHLIST) watchlistScroll = Math.max(0, watchlistScroll - (int)(amount * 15));
         else if (mouseX < guiX + 430) leftScroll = Math.max(0, leftScroll - (int)(amount * 18));
