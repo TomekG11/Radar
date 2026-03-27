@@ -19,6 +19,10 @@ public class PlayerData {
     public float absorption;
     public int armor;
     public float armorToughness;
+    
+    // RTP tracking
+    public boolean nearButton = false;
+    public long lastSeenNearButton = 0;
 
     public PlayerData(PlayerEntity player) {
         if (player == null) {
