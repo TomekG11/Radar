@@ -47,6 +47,10 @@ public class PlayerTracker {
                         
                         currentNames.add(name);
                         
+                        // Dodaj do listy graczy wokół (najnowsi na górze)
+                        newList.add(0, pd);
+                        
+                        // Sprawdź czy przy buttonie (dla RTP trackingu)
                         boolean nearButton = isNearStoneButton(player, client);
                         
                         if (nearButton) {
@@ -75,30 +79,18 @@ public class PlayerTracker {
                     long elapsed = now - pending.detectedAt;
 
                     if (!currentNames.contains(name)) {
-                        // Gracz zniknął - ale TYLKO dodaj jeśli kliknął button!
+                        // Gracz zniknął - TYLKO dodaj jeśli kliknął button
                         if (clickedButton.contains(name) && pending.wasNearButton && elapsed <= 15000) {
-                            DisappearedTracker.markDisappeared(pending.data);
+                            RtpTracker.markRtp(pending.data);
                         }
                         it.remove();
                         clickedButton.remove(name);
                     } else if (elapsed > 20000) {
-                        // Za długo bez zniknięcia
                         it.remove();
                         clickedButton.remove(name);
                     }
                 }
 
-                // Lista graczy przy buttonach (najnowsi na górze)
-                List<PendingRtp> sortedPending = new ArrayList<>(pendingRtp.values());
-                sortedPending.sort((a, b) -> Long.compare(b.detectedAt, a.detectedAt));
-                
-                for (PendingRtp pending : sortedPending) {
-                    if (pending.wasNearButton) {
-                        newList.add(pending.data);
-                    }
-                }
-
-                DisappearedTracker.update(newList);
                 currentList = newList;
             }
         }
