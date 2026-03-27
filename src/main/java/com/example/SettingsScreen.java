@@ -31,7 +31,7 @@ public class SettingsScreen extends Screen {
         float ease = MathHelper.clamp((float)(System.currentTimeMillis() - openTime) / 250.0F, 0.0F, 1.0F);
         ease = 1.0F - (1.0F - ease) * (1.0F - ease);
         int gX = guiX, gY = guiY + (int)((1.0F - ease) * 20.0F);
-        renderBackground(ctx, mouseX, mouseY, delta);
+        renderBackground(ctx);
         ctx.fill(gX - 1, gY - 1, gX + GUI_W + 1, gY + GUI_H + 1, ModSettings.accentColor);
         ctx.fill(gX, gY, gX + GUI_W, gY + GUI_H, -267909104);
         ctx.fill(gX, gY, gX + GUI_W, gY + 48, -15921878);
@@ -91,22 +91,22 @@ public class SettingsScreen extends Screen {
         ease = 1.0F - (1.0F - ease) * (1.0F - ease);
         int gX = guiX, gY = guiY + (int)((1.0F - ease) * 20.0F);
         int y = gY + 54, btnW = 120, btnH = 20, gap = 6;
-        y += 18; // sectionSkip
+        y += 18;
         ModSettings.ColorPreset[] presets = ModSettings.ColorPreset.values();
         for (int i = 0; i < presets.length; i++) {
             int bX = gX + 20 + (i % 4) * (btnW + gap), bY = y + (i / 4) * (btnH + gap);
             if (hitTest(mx, my, bX, bY, btnW, btnH)) { ModSettings.setColor(presets[i]); return true; }
         }
         y += (int) Math.ceil((double) presets.length / 4.0D) * (btnH + gap) + 12;
-        y += 18; y += 26; // sectionSkip + desc
+        y += 18; y += 26;
         int fBtnW = 245;
         if (hitTest(mx, my, gX + 20, y, fBtnW, btnH)) { ModSettings.fullSetOnly = !ModSettings.fullSetOnly; return true; }
         if (hitTest(mx, my, gX + 20 + fBtnW + 10, y, fBtnW, btnH)) { ModSettings.showElytra = !ModSettings.showElytra; return true; }
-        y += btnH + 14; y += 18; y += 26; // sectionSkip + desc
+        y += btnH + 14; y += 18; y += 26;
         int gBtnW = 245;
         if (hitTest(mx, my, gX + 20, y, gBtnW, btnH)) { ModSettings.performanceMode = !ModSettings.performanceMode; return true; }
         if (hitTest(mx, my, gX + 20 + gBtnW + 10, y, gBtnW, btnH)) { ModSettings.closeOnTpa = !ModSettings.closeOnTpa; return true; }
-        y += btnH + 14; y += 18; y += 14; // sectionSkip + desc
+        y += btnH + 14; y += 18; y += 14;
         int blBtnW = 220, blBtnX = gX + 270 - blBtnW / 2;
         if (hitTest(mx, my, blBtnX, y, blBtnW, btnH)) { MinecraftClient.getInstance().setScreen(new BlacklistScreen(this)); return true; }
         int backX = gX + 270 - 60, backY = gY + GUI_H - 40;
