@@ -60,10 +60,10 @@ public class GearReaderScreen extends Screen {
         ctx.fill(gX, gY, gX + GUI_W, gY + GUI_H, -267909104);
         fillGradientH(ctx, gX, gY, GUI_W, 48, -15921878, -15066550);
         ctx.fill(gX, gY + 46, gX + GUI_W, gY + 47, ModSettings.accentColor);
-        int tw = textRenderer.getWidth("UKRAINSKI READER");
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§b§lUKRAINSKI READER"), gX + 430 - tw / 2, gY + 17, ModSettings.accentColor2);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§7By smiciak"), gX + 8, gY + 33, -10066313);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§8Tryb: " + (ModSettings.fullSetOnly ? "§aPełny set" : "§7Dowolny item")), gX + GUI_W - 150, gY + 33, -10066313);
+        int tw = textRenderer.getWidth("RTP DETECTOR");
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§c§lRTP DETECTOR"), gX + 430 - tw / 2, gY + 17, ModSettings.accentColor2);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§7Stone Button Tracker"), gX + 8, gY + 33, -10066313);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§8Pending: §e" + PlayerTracker.getPendingCount()), gX + GUI_W - 120, gY + 33, -10066313);
         renderTabBar(ctx, mx, my, gX, gY);
         int pY = gY + 52;
 
@@ -83,9 +83,9 @@ public class GearReaderScreen extends Screen {
 
     private void renderTabBar(DrawContext ctx, int mx, int my, int gX, int gY) {
         int ty = gY + 2;
-        renderInlineBtn(ctx, "GRACZE", currentTab == Tab.PLAYERS ? GuiButton.Style.BLUE : GuiButton.Style.WHITE, gX + 4, ty, 90, 18, hitTest(mx, my, gX + 4, ty, 90, 18));
-        renderInlineBtn(ctx, "★ WATCHLIST", currentTab == Tab.WATCHLIST ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, gX + 98, ty, 110, 18, hitTest(mx, my, gX + 98, ty, 110, 18));
-        renderInlineBtn(ctx, "⛔ BLACKLIST", currentTab == Tab.BLACKLIST ? GuiButton.Style.RED : GuiButton.Style.WHITE, gX + 212, ty, 110, 18, hitTest(mx, my, gX + 212, ty, 110, 18));
+        renderInlineBtn(ctx, "PRZY BUTTONIE", currentTab == Tab.PLAYERS ? GuiButton.Style.BLUE : GuiButton.Style.WHITE, gX + 4, ty, 110, 18, hitTest(mx, my, gX + 4, ty, 110, 18));
+        renderInlineBtn(ctx, "★ WATCHLIST", currentTab == Tab.WATCHLIST ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, gX + 118, ty, 110, 18, hitTest(mx, my, gX + 118, ty, 110, 18));
+        renderInlineBtn(ctx, "⛔ BLACKLIST", currentTab == Tab.BLACKLIST ? GuiButton.Style.RED : GuiButton.Style.WHITE, gX + 232, ty, 110, 18, hitTest(mx, my, gX + 232, ty, 110, 18));
     }
 
     private void renderLeftPanel(DrawContext ctx, int mx, int my, int gX, int pY) {
@@ -93,11 +93,11 @@ public class GearReaderScreen extends Screen {
         int pX = gX + 6, pW = 418, cBot = pY + panelH;
         fillGradientH(ctx, pX, pY, pW, 28, -15921878, -15198144);
         ctx.fill(pX, pY + 27, pX + pW, pY + 28, -14013846);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§f§lGRACZE W ZASIĘGU"), pX + 8, pY + 8, ModSettings.accentColor2);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§6§l🔘 PRZY STONE BUTTON"), pX + 8, pY + 8, ModSettings.accentColor2);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + players.size() + ")"), pX + pW - textRenderer.getWidth("(" + players.size() + ")") - 6, pY + 8, -10066313);
         ctx.fill(pX, pY + 28, pX + pW, cBot, -16316657);
         ctx.enableScissor(pX, pY + 28, pX + pW, cBot);
-        if (players.isEmpty()) ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak graczy w zasięgu"), pX + pW / 2, pY + 28 + panelH / 2 - 4, -10066313);
+        if (players.isEmpty()) ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak graczy przy buttonach"), pX + pW / 2, pY + 28 + panelH / 2 - 4, -10066313);
         int y = pY + 30 - leftScroll;
         for (PlayerData pd : players) {
             if (y + 70 > pY + 28 && y < cBot) renderEntry(ctx, pd, pX + 4, y, pW - 8, null, mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, false, 0, 0, pY + 28, cBot);
@@ -111,10 +111,10 @@ public class GearReaderScreen extends Screen {
         int pX = gX + 436, pW = 418, cTop = pY + 28, cBot = pY + panelH - 24;
         fillGradientH(ctx, pX, pY, pW, 28, -14021363, -12576744);
         ctx.fill(pX, pY + 27, pX + pW, pY + 28, -7851213);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§c§lZNIKNIĘCI §7(RTP?)"), pX + 8, pY + 8, -48060);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§c§l🚀 RTP WYKRYTY!"), pX + 8, pY + 8, -48060);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + list.size() + ")"), pX + pW - textRenderer.getWidth("(" + list.size() + ")") - 6, pY + 8, -10066313);
         ctx.fill(pX, cTop, pX + pW, cBot, -16316657);
-        if (list.isEmpty()) { ctx.enableScissor(pX, cTop, pX + pW, cBot); ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak znikniętych graczy"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 4, -10066313); ctx.disableScissor(); }
+        if (list.isEmpty()) { ctx.enableScissor(pX, cTop, pX + pW, cBot); ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak wykrytych RTP"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 4, -10066313); ctx.disableScissor(); }
         int y = pY + 30 - rightScroll;
         for (DisappearedTracker.DisappearedEntry entry : list) {
             if (y + 70 > cTop && y < cBot) renderEntry(ctx, entry.data, pX + 4, y, pW - 8, entry.getTimeAgo(), mx >= pX && mx <= pX + pW && my >= y && my <= y + 70, true, pX, pW, cTop, cBot);
@@ -172,8 +172,13 @@ public class GearReaderScreen extends Screen {
         ctx.fill(x, y, x + w, y + 1, -14013846);
         renderHead(ctx, pd, x + 4, y + 3, 26);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l" + pd.name), x + 38, y + 4, -22016);
-        if (timeAgo != null) ctx.drawTextWithShadow(textRenderer, Text.literal("§c⏱" + timeAgo), x + 38, y + 15, -39356);
-        if (NetheriteChecker.hasElytra(pd)) { int ex = x + 38 + (timeAgo != null ? textRenderer.getWidth("⏱ " + timeAgo) + 4 : 0); ctx.drawTextWithShadow(textRenderer, Text.literal("§b🪂"), ex, y + 15, -16724737); }
+        
+        if (timeAgo != null) {
+            ctx.drawTextWithShadow(textRenderer, Text.literal("§c🚀 RTP " + timeAgo), x + 38, y + 15, -39356);
+        } else {
+            ctx.drawTextWithShadow(textRenderer, Text.literal("§6🔘 Przy buttonie..."), x + 38, y + 15, -22016);
+        }
+        
         float hp = pd.health / 2.0F, maxHp = pd.maxHealth / 2.0F, abs = pd.absorption / 2.0F;
         float ratio = maxHp > 0 ? hp / maxHp : 0;
         int hpCol = ratio > 0.6F ? -16711868 : (ratio > 0.3F ? -13312 : -56798);
@@ -231,9 +236,9 @@ public class GearReaderScreen extends Screen {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int mx = (int) mouseX, my = (int) mouseY, gX = guiX, gY = guiY, pY = gY + 52;
         if (hitTest(mx, my, gX + GUI_W - 26, gY + 2, 22, 18)) { MinecraftClient.getInstance().setScreen(new SettingsScreen(this)); return true; }
-        if (hitTest(mx, my, gX + 4, gY + 2, 90, 18)) { currentTab = Tab.PLAYERS; return true; }
-        if (hitTest(mx, my, gX + 98, gY + 2, 110, 18)) { currentTab = Tab.WATCHLIST; return true; }
-        if (hitTest(mx, my, gX + 212, gY + 2, 110, 18)) { currentTab = Tab.BLACKLIST; return true; }
+        if (hitTest(mx, my, gX + 4, gY + 2, 110, 18)) { currentTab = Tab.PLAYERS; return true; }
+        if (hitTest(mx, my, gX + 118, gY + 2, 110, 18)) { currentTab = Tab.WATCHLIST; return true; }
+        if (hitTest(mx, my, gX + 232, gY + 2, 110, 18)) { currentTab = Tab.BLACKLIST; return true; }
 
         if (currentTab == Tab.PLAYERS) {
             if (hitTest(mx, my, gX + 436, gY + GUI_H - 40, 90, 16)) { DisappearedTracker.clearAll(); return true; }
@@ -297,10 +302,6 @@ public class GearReaderScreen extends Screen {
 
     private void renderItemSlot(DrawContext ctx, ItemStack stack, int x, int y) {
         if (stack != null && !stack.isEmpty()) {
-            if (!ModSettings.performanceMode) {
-                if (NetheriteChecker.isNetherite(stack)) { ctx.fill(x - 2, y - 2, x + 18, y + 18, 872393216); ctx.fill(x - 1, y - 1, x + 17, y + 17, 1442818560); }
-                if (NetheriteChecker.isElytra(stack)) { ctx.fill(x - 2, y - 2, x + 18, y + 18, 855690495); ctx.fill(x - 1, y - 1, x + 17, y + 17, 1426115839); }
-            }
             ctx.drawItem(stack, x, y);
         } else {
             ctx.fill(x, y, x + 16, y + 16, -15921894);
