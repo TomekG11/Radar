@@ -1,10 +1,8 @@
 package com.example;
 
 public class ModSettings {
-    public static int accentColor = -11184641;
-    public static int accentColor2 = -16724737;
-    public static boolean fullSetOnly = false;
-    public static boolean showElytra = true;
+    public static int accentColor = -30720; // pomarańczowy
+    public static int accentColor2 = -13312;
     public static boolean performanceMode = false;
     public static boolean closeOnTpa = true;
 
@@ -14,11 +12,11 @@ public class ModSettings {
     }
 
     public enum ColorPreset {
+        ORANGE("Pomarańcz", -30720, -13312),
+        RED("Czerwony", -3399134, -48060),
         BLUE("Niebieski", -11184641, -16724737),
         GREEN("Zielony", -16724924, -16711800),
-        RED("Czerwony", -3399134, -48060),
         PURPLE("Fioletowy", -6736897, -3381505),
-        ORANGE("Pomarańcz", -30720, -13312),
         CYAN("Cyjan", -16724788, -16711681),
         PINK("Różowy", -47958, -26164);
 
