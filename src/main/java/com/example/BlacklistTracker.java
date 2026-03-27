@@ -9,9 +9,7 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class BlacklistTracker {
     private static final Set<String> blacklisted = new LinkedHashSet<>();
