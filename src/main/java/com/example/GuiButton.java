@@ -18,20 +18,17 @@ public class GuiButton extends ButtonWidget {
 
     @Override
     public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
-        boolean hov = this.isHovered();
+        boolean hov = isHovered();
         int bg = hov ? blendColor(style.bg, style.border, 0.35F) : style.bg;
-        
         ctx.fill(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + getHeight() - 1, bg);
         ctx.fill(getX(), getY(), getX() + getWidth(), getY() + 1, style.border);
         ctx.fill(getX(), getY() + getHeight() - 1, getX() + getWidth(), getY() + getHeight(), style.border);
         ctx.fill(getX(), getY(), getX() + 1, getY() + getHeight(), style.border);
         ctx.fill(getX() + getWidth() - 1, getY(), getX() + getWidth(), getY() + getHeight(), style.border);
-        
         if (hov) {
             ctx.fill(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + 2, addAlpha(style.border, 102));
             ctx.fill(getX() + 1, getY() + getHeight() - 2, getX() + getWidth() - 1, getY() + getHeight() - 1, addAlpha(style.border, 102));
         }
-
         TextRenderer tr = MinecraftClient.getInstance().textRenderer;
         int tw = tr.getWidth(Text.literal(label));
         int tx = getX() + (getWidth() - tw) / 2;
@@ -41,18 +38,14 @@ public class GuiButton extends ButtonWidget {
     }
 
     private int blendColor(int c1, int c2, float t) {
-        int r = lerp(c1 >> 16 & 255, c2 >> 16 & 255, t);
-        int g = lerp(c1 >> 8 & 255, c2 >> 8 & 255, t);
-        int b = lerp(c1 & 255, c2 & 255, t);
+        int r = (int)((c1 >> 16 & 255) + ((c2 >> 16 & 255) - (c1 >> 16 & 255)) * t);
+        int g = (int)((c1 >> 8 & 255) + ((c2 >> 8 & 255) - (c1 >> 8 & 255)) * t);
+        int b = (int)((c1 & 255) + ((c2 & 255) - (c1 & 255)) * t);
         return -16777216 | r << 16 | g << 8 | b;
     }
 
     private int addAlpha(int color, int alpha) {
         return alpha << 24 | (color & 16777215);
-    }
-
-    private int lerp(int a, int b, float t) {
-        return (int) ((float) a + (float) (b - a) * t);
     }
 
     public enum Style {
