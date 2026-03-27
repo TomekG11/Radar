@@ -17,7 +17,6 @@ public class PlayerTracker {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.world != null && client.player != null) {
                 List<PlayerData> newList = new ArrayList<>();
-                
                 for (PlayerEntity player : client.world.getPlayers()) {
                     if (player != client.player && !BlacklistTracker.isBlacklisted(player.getName().getString())) {
                         PlayerData pd = new PlayerData(player);
@@ -30,18 +29,15 @@ public class PlayerTracker {
                         }
                     }
                 }
-
                 Set<String> newNames = new HashSet<>();
                 for (PlayerData pd : newList) {
                     newNames.add(pd.name);
                 }
-
                 for (PlayerData old : currentList) {
                     if (!newNames.contains(old.name)) {
                         DisappearedTracker.markDisappeared(old);
                     }
                 }
-
                 DisappearedTracker.update(newList);
                 currentList = newList;
             }
