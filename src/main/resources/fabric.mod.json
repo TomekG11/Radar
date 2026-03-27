@@ -1,18 +1,12 @@
 {
   "schemaVersion": 1,
   "id": "ukrainskireader",
-  "version": "${version}",
+  "version": "1.0.0",
   "name": "UkrainskiReader",
-  "description": "Gear Reader - wykrywa graczy w zasięgu z netherytowymi itemami",
-  "authors": [
-    "smiciak"
-  ],
-  "contact": {
-    "homepage": "https://github.com/yourusername/ukrainskireader",
-    "sources": "https://github.com/yourusername/ukrainskireader"
-  },
+  "description": "Gear Reader - players in range with netherite items",
+  "authors": ["You"],
+  "contact": {},
   "license": "CC0-1.0",
-  "icon": "assets/ukrainskireader/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
@@ -27,8 +21,5 @@
     "minecraft": "~1.20.1",
     "java": ">=17",
     "fabric-api": "*"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }
