@@ -3,7 +3,8 @@
   "package": "com.example.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "ClientMixin"
+    "ClientMixin",
+    "ChatHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
