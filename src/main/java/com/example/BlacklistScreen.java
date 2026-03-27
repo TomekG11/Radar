@@ -77,7 +77,7 @@ public class BlacklistScreen extends Screen {
         ease = 1.0F - (1.0F - ease) * (1.0F - ease);
         int offY = (int)((1.0F - ease) * 20.0F);
         int gX = guiX, gY = guiY + offY;
-        renderBackground(ctx, mouseX, mouseY, delta);
+        renderBackground(ctx);
         ctx.fill(gX - 1, gY - 1, gX + GUI_W + 1, gY + GUI_H + 1, ModSettings.accentColor);
         ctx.fill(gX, gY, gX + GUI_W, gY + GUI_H, -267909104);
         ctx.fill(gX, gY, gX + GUI_W, gY + 48, -15921878);
@@ -109,8 +109,7 @@ public class BlacklistScreen extends Screen {
         rebuildButtons();
     }
 
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         scroll = Math.max(0, scroll - (int)(amount * 15.0D));
         rebuildButtons();
         return true;
