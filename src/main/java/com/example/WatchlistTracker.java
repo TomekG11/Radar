@@ -11,21 +11,10 @@ public class WatchlistTracker {
         }
     }
 
-    public static void remove(String name) {
-        watchlist.remove(name);
-    }
-
-    public static boolean isWatched(String name) {
-        return watchlist.containsKey(name);
-    }
-
-    public static Collection<WatchlistEntry> getAll() {
-        return watchlist.values();
-    }
-
-    public static void clear() {
-        watchlist.clear();
-    }
+    public static void remove(String name) { watchlist.remove(name); }
+    public static boolean isWatched(String name) { return watchlist.containsKey(name); }
+    public static Collection<WatchlistEntry> getAll() { return watchlist.values(); }
+    public static void clear() { watchlist.clear(); }
 
     public static class WatchlistEntry {
         public final PlayerData data;
@@ -36,20 +25,14 @@ public class WatchlistTracker {
             this.addedAt = System.currentTimeMillis();
         }
 
-        public WatchlistEntry(PlayerData data, long addedAt) {
-            this.data = data;
-            this.addedAt = addedAt;
-        }
-
         public String getTimeAgo() {
-            long seconds = (System.currentTimeMillis() - this.addedAt) / 1000L;
-            if (seconds < 60L) return seconds + "s temu";
-            long minutes = seconds / 60L;
-            if (minutes < 60L) return minutes + "min temu";
-            long hours = minutes / 60L;
-            if (hours < 24L) return hours + "h temu";
-            long days = hours / 24L;
-            return days + "d temu";
+            long s = (System.currentTimeMillis() - addedAt) / 1000L;
+            if (s < 60L) return s + "s temu";
+            long m = s / 60L;
+            if (m < 60L) return m + "min temu";
+            long h = m / 60L;
+            if (h < 24L) return h + "h temu";
+            return (h / 24L) + "d temu";
         }
     }
 }
