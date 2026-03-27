@@ -16,8 +16,7 @@ public class GuiButton extends ButtonWidget {
         this.style = style;
     }
 
-    @Override
-    public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
+    public void renderButton(DrawContext ctx, int mouseX, int mouseY, float delta) {
         boolean hov = isHovered();
         int bg = hov ? blendColor(style.bg, style.border, 0.35F) : style.bg;
         ctx.fill(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + getHeight() - 1, bg);
