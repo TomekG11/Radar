@@ -5,14 +5,10 @@ import java.util.*;
 public class DisappearedTracker {
     private static final LinkedList<DisappearedEntry> disappeared = new LinkedList<>();
 
-    public static void update(List<PlayerData> currentVisible) {
-        Set<String> currentNames = new HashSet<>();
-        for (PlayerData pd : currentVisible) currentNames.add(pd.name);
-        disappeared.removeIf(e -> currentNames.contains(e.data.name));
-    }
-
     public static void markDisappeared(PlayerData pd) {
+        // Usuń jeśli już istnieje
         disappeared.removeIf(e -> e.data.name.equals(pd.name));
+        // Dodaj na początek (najnowsi na górze)
         disappeared.addFirst(new DisappearedEntry(pd));
     }
 
@@ -26,6 +22,11 @@ public class DisappearedTracker {
 
     public static void clearAll() {
         disappeared.clear();
+        PlayerTracker.reset();
+    }
+    
+    public static int getCount() {
+        return disappeared.size();
     }
 
     public static class DisappearedEntry {
