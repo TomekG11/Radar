@@ -3,23 +3,33 @@ package com.example;
 import java.util.*;
 
 public class DisappearedTracker {
-    private static final Map<String, DisappearedEntry> disappeared = new LinkedHashMap<>();
+    private static final LinkedList<DisappearedEntry> disappeared = new LinkedList<>();
 
     public static void update(List<PlayerData> currentVisible) {
         Set<String> currentNames = new HashSet<>();
         for (PlayerData pd : currentVisible) currentNames.add(pd.name);
-        disappeared.entrySet().removeIf(e -> currentNames.contains(e.getKey()));
+        disappeared.removeIf(e -> currentNames.contains(e.data.name));
     }
 
     public static void markDisappeared(PlayerData pd) {
-        if (!disappeared.containsKey(pd.name)) {
-            disappeared.put(pd.name, new DisappearedEntry(pd));
-        }
+        // Usuń jeśli już istnieje (żeby dodać na początek)
+        disappeared.removeIf(e -> e.data.name.equals(pd.name));
+        // Dodaj na początek listy (najnowsi na górze)
+        disappeared.addFirst(new DisappearedEntry(pd));
     }
 
-    public static Collection<DisappearedEntry> getDisappeared() { return disappeared.values(); }
-    public static void remove(String name) { disappeared.remove(name); }
-    public static void clearAll() { disappeared.clear(); }
+    public static List<DisappearedEntry> getDisappeared() {
+        return new ArrayList<>(disappeared);
+    }
+
+    public static void remove(String name) {
+        disappeared.removeIf(e -> e.data.name.equals(name));
+    }
+
+    public static void clearAll() {
+        disappeared.clear();
+        PlayerTracker.reset();
+    }
 
     public static class DisappearedEntry {
         public final PlayerData data;
