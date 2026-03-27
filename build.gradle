@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'fabric-loom' version '1.6.12'
     id 'maven-publish'
 }
 
@@ -14,18 +14,9 @@ repositories {
     mavenCentral()
 }
 
-// KLUCZOWA ZMIANA
-configurations {
-    modCompileOnly
-    modRuntimeOnly
-}
-
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    
-    // Użyj intermediary mappings
     mappings loom.officialMojangMappings()
-    
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
