@@ -1,11 +1,10 @@
 package com.example;
 
-import net.minecraft.class_1792;
-import net.minecraft.class_1799;
-import net.minecraft.class_1802;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 
 public class NetheriteChecker {
-    
     public static boolean hasNetheriteItem(PlayerData data) {
         if (ModSettings.fullSetOnly) {
             return isNetheriteArmor(data.helmet) &&
@@ -25,48 +24,48 @@ public class NetheriteChecker {
         }
     }
 
-    public static boolean isNetheriteArmor(class_1799 stack) {
-        if (stack != null && !stack.method_7960()) {
-            class_1792 item = stack.method_7909();
-            return item == class_1802.field_22027 ||
-                   item == class_1802.field_22028 ||
-                   item == class_1802.field_22029 ||
-                   item == class_1802.field_22030;
+    public static boolean isNetheriteArmor(ItemStack stack) {
+        if (stack != null && !stack.isEmpty()) {
+            Item item = stack.getItem();
+            return item == Items.NETHERITE_HELMET ||
+                   item == Items.NETHERITE_CHESTPLATE ||
+                   item == Items.NETHERITE_LEGGINGS ||
+                   item == Items.NETHERITE_BOOTS;
         }
         return false;
     }
 
-    public static boolean isNetheriteWeapon(class_1799 stack) {
-        if (stack != null && !stack.method_7960()) {
-            class_1792 item = stack.method_7909();
-            return item == class_1802.field_22022 ||
-                   item == class_1802.field_22024 ||
-                   item == class_1802.field_22025 ||
-                   item == class_1802.field_22023 ||
-                   item == class_1802.field_22026;
+    public static boolean isNetheriteWeapon(ItemStack stack) {
+        if (stack != null && !stack.isEmpty()) {
+            Item item = stack.getItem();
+            return item == Items.NETHERITE_SWORD ||
+                   item == Items.NETHERITE_AXE ||
+                   item == Items.NETHERITE_PICKAXE ||
+                   item == Items.NETHERITE_SHOVEL ||
+                   item == Items.NETHERITE_HOE;
         }
         return false;
     }
 
-    public static boolean isNetherite(class_1799 stack) {
-        if (stack != null && !stack.method_7960()) {
-            class_1792 item = stack.method_7909();
-            return item == class_1802.field_22022 ||
-                   item == class_1802.field_22024 ||
-                   item == class_1802.field_22025 ||
-                   item == class_1802.field_22023 ||
-                   item == class_1802.field_22026 ||
-                   item == class_1802.field_22027 ||
-                   item == class_1802.field_22028 ||
-                   item == class_1802.field_22029 ||
-                   item == class_1802.field_22030;
+    public static boolean isNetherite(ItemStack stack) {
+        if (stack != null && !stack.isEmpty()) {
+            Item item = stack.getItem();
+            return item == Items.NETHERITE_SWORD ||
+                   item == Items.NETHERITE_AXE ||
+                   item == Items.NETHERITE_PICKAXE ||
+                   item == Items.NETHERITE_SHOVEL ||
+                   item == Items.NETHERITE_HOE ||
+                   item == Items.NETHERITE_HELMET ||
+                   item == Items.NETHERITE_CHESTPLATE ||
+                   item == Items.NETHERITE_LEGGINGS ||
+                   item == Items.NETHERITE_BOOTS;
         }
         return false;
     }
 
-    public static boolean isElytra(class_1799 stack) {
-        if (stack != null && !stack.method_7960()) {
-            return stack.method_7909() == class_1802.field_8833;
+    public static boolean isElytra(ItemStack stack) {
+        if (stack != null && !stack.isEmpty()) {
+            return stack.getItem() == Items.ELYTRA;
         }
         return false;
     }
