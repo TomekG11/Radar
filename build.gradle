@@ -14,21 +14,9 @@ repositories {
     mavenCentral()
 }
 
-loom {
-    // Użyj intermediary mappings
-    runs {
-        client {
-            ideConfigGenerated = true
-        }
-    }
-}
-
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.layered() {
-        // Używamy intermediary zamiast yarn named
-        officialMojangMappings()
-    }
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
@@ -56,4 +44,9 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}"}
     }
+}
+
+// Konfiguracja Loom do użycia intermediary mappings
+loom {
+    accessWidenerPath = file("src/main/resources/ukrainskireader.accesswidener")
 }
