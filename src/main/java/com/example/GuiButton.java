@@ -1,79 +1,67 @@
 package com.example;
 
-import net.minecraft.class_2561;
-import net.minecraft.class_310;
-import net.minecraft.class_327;
-import net.minecraft.class_332;
-import net.minecraft.class_4185;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.Text;
 
-public class GuiButton extends class_4185 {
+public class GuiButton extends ButtonWidget {
     private final Style style;
     private final String label;
 
-    public GuiButton(int x, int y, int w, int h, String label, Style style, class_4241 action) {
-        super(x, y, w, h, class_2561.method_43470(label), action, field_40754);
+    public GuiButton(int x, int y, int w, int h, String label, Style style, PressAction action) {
+        super(x, y, w, h, Text.literal(label), action, DEFAULT_NARRATION_SUPPLIER);
         this.label = label;
         this.style = style;
     }
 
     @Override
-    public void method_48579(class_332 ctx, int mouseX, int mouseY, float delta) {
-        boolean hov = this.method_49606();
+    public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
+        boolean hov = this.isHovered();
         int bg = hov ? blendColor(style.bg, style.border, 0.35F) : style.bg;
         
-        ctx.method_25294(method_46426() + 1, method_46427() + 1, 
-                         method_46426() + method_25368() - 1, 
-                         method_46427() + method_25364() - 1, bg);
-        
-        ctx.method_25294(method_46426(), method_46427(), 
-                         method_46426() + method_25368(), method_46427() + 1, style.border);
-        ctx.method_25294(method_46426(), method_46427() + method_25364() - 1, 
-                         method_46426() + method_25368(), method_46427() + method_25364(), style.border);
-        ctx.method_25294(method_46426(), method_46427(), 
-                         method_46426() + 1, method_46427() + method_25364(), style.border);
-        ctx.method_25294(method_46426() + method_25368() - 1, method_46427(), 
-                         method_46426() + method_25368(), method_46427() + method_25364(), style.border);
+        ctx.fill(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + getHeight() - 1, bg);
+        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + 1, style.border);
+        ctx.fill(getX(), getY() + getHeight() - 1, getX() + getWidth(), getY() + getHeight(), style.border);
+        ctx.fill(getX(), getY(), getX() + 1, getY() + getHeight(), style.border);
+        ctx.fill(getX() + getWidth() - 1, getY(), getX() + getWidth(), getY() + getHeight(), style.border);
         
         if (hov) {
-            ctx.method_25294(method_46426() + 1, method_46427() + 1, 
-                             method_46426() + method_25368() - 1, method_46427() + 2, 
-                             addAlpha(style.border, 102));
-            ctx.method_25294(method_46426() + 1, method_46427() + method_25364() - 2, 
-                             method_46426() + method_25368() - 1, method_46427() + method_25364() - 1, 
-                             addAlpha(style.border, 102));
+            ctx.fill(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + 2, addAlpha(style.border, 102));
+            ctx.fill(getX() + 1, getY() + getHeight() - 2, getX() + getWidth() - 1, getY() + getHeight() - 1, addAlpha(style.border, 102));
         }
 
-        class_327 tr = class_310.method_1551().field_1772;
-        int tw = tr.method_27525(class_2561.method_43470(label));
-        int tx = method_46426() + (method_25368() - tw) / 2;
-        int ty = method_46427() + (method_25364() - 8) / 2;
-        
-        ctx.method_51439(tr, class_2561.method_43470(label), tx + 1, ty + 1, 0x55000000, false);
-        ctx.method_51439(tr, class_2561.method_43470(label), tx, ty, hov ? 0xFFFFFFFF : style.text, false);
+        TextRenderer tr = MinecraftClient.getInstance().textRenderer;
+        int tw = tr.getWidth(Text.literal(label));
+        int tx = getX() + (getWidth() - tw) / 2;
+        int ty = getY() + (getHeight() - 8) / 2;
+        ctx.drawTextWithShadow(tr, Text.literal(label), tx + 1, ty + 1, 1426063360);
+        ctx.drawTextWithShadow(tr, Text.literal(label), tx, ty, hov ? -1 : style.text);
     }
 
     private int blendColor(int c1, int c2, float t) {
-        int r = lerp((c1 >> 16) & 0xFF, (c2 >> 16) & 0xFF, t);
-        int g = lerp((c1 >> 8) & 0xFF, (c2 >> 8) & 0xFF, t);
-        int b = lerp(c1 & 0xFF, c2 & 0xFF, t);
-        return 0xFF000000 | (r << 16) | (g << 8) | b;
+        int r = lerp(c1 >> 16 & 255, c2 >> 16 & 255, t);
+        int g = lerp(c1 >> 8 & 255, c2 >> 8 & 255, t);
+        int b = lerp(c1 & 255, c2 & 255, t);
+        return -16777216 | r << 16 | g << 8 | b;
     }
 
     private int addAlpha(int color, int alpha) {
-        return (alpha << 24) | (color & 0xFFFFFF);
+        return alpha << 24 | (color & 16777215);
     }
 
     private int lerp(int a, int b, float t) {
-        return (int)(a + (b - a) * t);
+        return (int) ((float) a + (float) (b - a) * t);
     }
 
     public enum Style {
-        GREEN(0xFF00FF11, 0xFF00BB00, 0xFF003300),
-        RED(0xFFAA0000, 0xFFFF4444, 0xFF1A1A1A),
-        WHITE(0xFF555555, 0xFFCCCCCC, 0xFF222222),
-        YELLOW(0xFFAAA800, 0xFFFFDD00, 0xFF1A1A00),
-        ORANGE(0xFFAA5500, 0xFFFFAA00, 0xFF1A0D00),
-        BLUE(0xFF0055AA, 0xFF3399FF, 0xFF001A2A);
+        GREEN(-16733645, -16711851, -16770550),
+        RED(-5636096, -48060, -15073280),
+        WHITE(-11184794, -3355427, -15658718),
+        YELLOW(-5601280, -8960, -15068160),
+        ORANGE(-5614336, -22016, -15070720),
+        BLUE(-16759638, -12281345, -16773350);
 
         public final int border;
         public final int text;
