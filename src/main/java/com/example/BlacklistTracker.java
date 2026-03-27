@@ -47,7 +47,7 @@ public class BlacklistTracker {
             }
             Files.writeString(savePath, GSON.toJson(arr));
         } catch (Exception e) {
-            System.err.println("[UkrainskiReader] Błąd zapisu blacklisty: " + e.getMessage());
+            System.err.println("[UkrainskiReader] Save error: " + e.getMessage());
         }
     }
 
@@ -59,9 +59,9 @@ public class BlacklistTracker {
                 for (JsonElement el : arr) {
                     blacklisted.add(el.getAsString());
                 }
-                System.out.println("[UkrainskiReader] Załadowano " + blacklisted.size() + " zablokowanych graczy.");
+                System.out.println("[UkrainskiReader] Loaded " + blacklisted.size() + " blacklisted players.");
             } catch (Exception e) {
-                System.err.println("[UkrainskiReader] Błąd odczytu blacklisty: " + e.getMessage());
+                System.err.println("[UkrainskiReader] Load error: " + e.getMessage());
             }
         }
     }
