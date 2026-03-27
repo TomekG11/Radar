@@ -7,8 +7,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 
 public class SettingsScreen extends Screen {
-    private static final int GUI_W = 540;
-    private static final int GUI_H = 560;
+    private static final int GUI_W = 400;
+    private static final int GUI_H = 320;
     private final Screen parent;
     private long openTime;
     private int guiX, guiY;
@@ -36,49 +36,38 @@ public class SettingsScreen extends Screen {
         ctx.fill(gX, gY, gX + GUI_W, gY + GUI_H, -267909104);
         ctx.fill(gX, gY, gX + GUI_W, gY + 48, -15921878);
         ctx.fill(gX, gY + 46, gX + GUI_W, gY + 47, ModSettings.accentColor);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§b§l⚙ USTAWIENIA"), gX + 270, gY + 17, ModSettings.accentColor2);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§8UkrainskiReader v1.0"), gX + 8, gY + 33, -12303258);
-        int y = gY + 54, btnW = 120, btnH = 20, gap = 6;
+        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§c§l⚙ USTAWIENIA"), gX + 200, gY + 17, ModSettings.accentColor2);
 
-        y = renderSection(ctx, gX, y, "§f▌ §b§lKOLOR INTERFEJSU");
-        ctx.fill(gX + GUI_W - 54, y - 14, gX + GUI_W - 12, y - 1, ModSettings.accentColor);
+        int y = gY + 60, btnW = 100, btnH = 20, gap = 6;
+
+        // Kolory
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§f▌ §6§lKOLOR INTERFEJSU"), gX + 14, y, ModSettings.accentColor2);
+        y += 20;
         ModSettings.ColorPreset[] presets = ModSettings.ColorPreset.values();
         for (int i = 0; i < presets.length; i++) {
             ModSettings.ColorPreset p = presets[i];
             boolean active = ModSettings.accentColor == p.accent;
-            int bX = gX + 20 + (i % 4) * (btnW + gap), bY = y + (i / 4) * (btnH + gap);
-            renderBtn(ctx, (active ? "§l✔ " : "") + p.label, active ? GuiButton.Style.BLUE : GuiButton.Style.WHITE, bX, bY, btnW, btnH, hitTest(mouseX, mouseY, bX, bY, btnW, btnH));
+            int bX = gX + 20 + (i % 3) * (btnW + gap), bY = y + (i / 3) * (btnH + gap);
+            renderBtn(ctx, (active ? "§l✔ " : "") + p.label, active ? GuiButton.Style.ORANGE : GuiButton.Style.WHITE, bX, bY, btnW, btnH, hitTest(mouseX, mouseY, bX, bY, btnW, btnH));
         }
-        y += (int) Math.ceil((double) presets.length / 4.0D) * (btnH + gap) + 12;
+        y += (int) Math.ceil((double) presets.length / 3.0D) * (btnH + gap) + 20;
 
-        y = renderSection(ctx, gX, y, "§f▌ §b§lTRYB FILTROWANIA");
-        ctx.drawTextWithShadow(textRenderer, Text.literal(ModSettings.fullSetOnly ? "§aPełny set: helm+napierśnik+spodnie+buty+broń" : "§7Dowolny item: chociaż 1 netherytowy"), gX + 14, y, -7829351);
-        y += 12;
-        ctx.drawTextWithShadow(textRenderer, Text.literal(ModSettings.showElytra ? "§aWykrywaj elytra: WŁ" : "§7Wykrywaj elytra: WYŁ"), gX + 14, y, -7829351);
-        y += 14;
-        int fBtnW = 245;
-        renderBtn(ctx, ModSettings.fullSetOnly ? "§l✔ Pełny set: WŁ" : "Pełny set: WYŁ", ModSettings.fullSetOnly ? GuiButton.Style.GREEN : GuiButton.Style.WHITE, gX + 20, y, fBtnW, btnH, hitTest(mouseX, mouseY, gX + 20, y, fBtnW, btnH));
-        renderBtn(ctx, ModSettings.showElytra ? "§l✔ Elytra: WŁ" : "Elytra: WYŁ", ModSettings.showElytra ? GuiButton.Style.GREEN : GuiButton.Style.WHITE, gX + 20 + fBtnW + 10, y, fBtnW, btnH, hitTest(mouseX, mouseY, gX + 20 + fBtnW + 10, y, fBtnW, btnH));
-        y += btnH + 14;
+        // Opcje
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§f▌ §6§lOPCJE"), gX + 14, y, ModSettings.accentColor2);
+        y += 20;
+        int optBtnW = 170;
+        renderBtn(ctx, ModSettings.performanceMode ? "§l✔ Performance: WŁ" : "Performance: WYŁ", ModSettings.performanceMode ? GuiButton.Style.GREEN : GuiButton.Style.WHITE, gX + 20, y, optBtnW, btnH, hitTest(mouseX, mouseY, gX + 20, y, optBtnW, btnH));
+        renderBtn(ctx, ModSettings.closeOnTpa ? "§l✔ Zamknij po TPA" : "Zamknij po TPA: WYŁ", ModSettings.closeOnTpa ? GuiButton.Style.GREEN : GuiButton.Style.WHITE, gX + 20 + optBtnW + 10, y, optBtnW, btnH, hitTest(mouseX, mouseY, gX + 20 + optBtnW + 10, y, optBtnW, btnH));
+        y += btnH + 20;
 
-        y = renderSection(ctx, gX, y, "§f▌ §e§lOPCJE GUI");
-        ctx.drawTextWithShadow(textRenderer, Text.literal(ModSettings.performanceMode ? "§aPerformance: max FPS" : "§7Performance: wyłączony"), gX + 14, y, -7829351);
-        y += 12;
-        ctx.drawTextWithShadow(textRenderer, Text.literal(ModSettings.closeOnTpa ? "§aZamknij po TPA: WŁ" : "§7Zamknij po TPA: WYŁ"), gX + 14, y, -7829351);
-        y += 14;
-        int gBtnW = 245;
-        renderBtn(ctx, ModSettings.performanceMode ? "§l✔ Performance: WŁ" : "Performance: WYŁ", ModSettings.performanceMode ? GuiButton.Style.YELLOW : GuiButton.Style.WHITE, gX + 20, y, gBtnW, btnH, hitTest(mouseX, mouseY, gX + 20, y, gBtnW, btnH));
-        renderBtn(ctx, ModSettings.closeOnTpa ? "§l✔ Zamknij po TPA: WŁ" : "Zamknij po TPA: WYŁ", ModSettings.closeOnTpa ? GuiButton.Style.GREEN : GuiButton.Style.WHITE, gX + 20 + gBtnW + 10, y, gBtnW, btnH, hitTest(mouseX, mouseY, gX + 20 + gBtnW + 10, y, gBtnW, btnH));
-        y += btnH + 14;
+        // Blacklist
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§f▌ §c§lBLACKLIST §7(" + BlacklistTracker.getAll().size() + ")"), gX + 14, y, ModSettings.accentColor2);
+        y += 20;
+        int blBtnW = 180;
+        renderBtn(ctx, "⛔ Zarządzaj Blacklistą", GuiButton.Style.RED, gX + GUI_W / 2 - blBtnW / 2, y, blBtnW, btnH, hitTest(mouseX, mouseY, gX + GUI_W / 2 - blBtnW / 2, y, blBtnW, btnH));
 
-        y = renderSection(ctx, gX, y, "§f▌ §c§lBLACKLIST");
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§7Zablokowanych: §f" + BlacklistTracker.getAll().size()), gX + 14, y, -7829351);
-        y += 14;
-        int blBtnW = 220, blBtnX = gX + 270 - blBtnW / 2;
-        renderBtn(ctx, "⛔ Zarządzaj Blacklistą", GuiButton.Style.RED, blBtnX, y, blBtnW, btnH, hitTest(mouseX, mouseY, blBtnX, y, blBtnW, btnH));
-
-        ctx.fill(gX + 10, gY + GUI_H - 50, gX + GUI_W - 10, gY + GUI_H - 49, -14540220);
-        int backX = gX + 270 - 60, backY = gY + GUI_H - 40;
+        // Powrót
+        int backX = gX + GUI_W / 2 - 60, backY = gY + GUI_H - 35;
         renderBtn(ctx, "← Powrót", GuiButton.Style.WHITE, backX, backY, 120, 22, hitTest(mouseX, mouseY, backX, backY, 120, 22));
         super.render(ctx, mouseX, mouseY, delta);
     }
@@ -90,34 +79,26 @@ public class SettingsScreen extends Screen {
         float ease = MathHelper.clamp((float)(System.currentTimeMillis() - openTime) / 250.0F, 0.0F, 1.0F);
         ease = 1.0F - (1.0F - ease) * (1.0F - ease);
         int gX = guiX, gY = guiY + (int)((1.0F - ease) * 20.0F);
-        int y = gY + 54, btnW = 120, btnH = 20, gap = 6;
-        y += 18;
+        int y = gY + 80, btnW = 100, btnH = 20, gap = 6;
+
         ModSettings.ColorPreset[] presets = ModSettings.ColorPreset.values();
         for (int i = 0; i < presets.length; i++) {
-            int bX = gX + 20 + (i % 4) * (btnW + gap), bY = y + (i / 4) * (btnH + gap);
+            int bX = gX + 20 + (i % 3) * (btnW + gap), bY = y + (i / 3) * (btnH + gap);
             if (hitTest(mx, my, bX, bY, btnW, btnH)) { ModSettings.setColor(presets[i]); return true; }
         }
-        y += (int) Math.ceil((double) presets.length / 4.0D) * (btnH + gap) + 12;
-        y += 18; y += 26;
-        int fBtnW = 245;
-        if (hitTest(mx, my, gX + 20, y, fBtnW, btnH)) { ModSettings.fullSetOnly = !ModSettings.fullSetOnly; return true; }
-        if (hitTest(mx, my, gX + 20 + fBtnW + 10, y, fBtnW, btnH)) { ModSettings.showElytra = !ModSettings.showElytra; return true; }
-        y += btnH + 14; y += 18; y += 26;
-        int gBtnW = 245;
-        if (hitTest(mx, my, gX + 20, y, gBtnW, btnH)) { ModSettings.performanceMode = !ModSettings.performanceMode; return true; }
-        if (hitTest(mx, my, gX + 20 + gBtnW + 10, y, gBtnW, btnH)) { ModSettings.closeOnTpa = !ModSettings.closeOnTpa; return true; }
-        y += btnH + 14; y += 18; y += 14;
-        int blBtnW = 220, blBtnX = gX + 270 - blBtnW / 2;
-        if (hitTest(mx, my, blBtnX, y, blBtnW, btnH)) { MinecraftClient.getInstance().setScreen(new BlacklistScreen(this)); return true; }
-        int backX = gX + 270 - 60, backY = gY + GUI_H - 40;
+        y += (int) Math.ceil((double) presets.length / 3.0D) * (btnH + gap) + 40;
+
+        int optBtnW = 170;
+        if (hitTest(mx, my, gX + 20, y, optBtnW, btnH)) { ModSettings.performanceMode = !ModSettings.performanceMode; return true; }
+        if (hitTest(mx, my, gX + 20 + optBtnW + 10, y, optBtnW, btnH)) { ModSettings.closeOnTpa = !ModSettings.closeOnTpa; return true; }
+        y += btnH + 40;
+
+        int blBtnW = 180;
+        if (hitTest(mx, my, gX + GUI_W / 2 - blBtnW / 2, y, blBtnW, btnH)) { MinecraftClient.getInstance().setScreen(new BlacklistScreen(this)); return true; }
+
+        int backX = gX + GUI_W / 2 - 60, backY = gY + GUI_H - 35;
         if (hitTest(mx, my, backX, backY, 120, 22)) { MinecraftClient.getInstance().setScreen(parent); return true; }
         return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    private int renderSection(DrawContext ctx, int gX, int y, String label) {
-        ctx.fill(gX + 10, y, gX + GUI_W - 10, y + 1, ModSettings.accentColor);
-        ctx.drawTextWithShadow(textRenderer, Text.literal(label), gX + 14, y + 4, ModSettings.accentColor2);
-        return y + 18;
     }
 
     private void renderBtn(DrawContext ctx, String label, GuiButton.Style style, int x, int y, int w, int h, boolean hovered) {
