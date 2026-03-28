@@ -3,7 +3,6 @@ package com.example;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.item.ItemStack;
@@ -35,11 +34,15 @@ public class GearReaderScreen extends Screen {
         guiY = (height - GUI_H) / 2;
         panelH = 408;
 
-        watchlistInput = new TextFieldWidget(textRenderer, guiX + 14, guiY + 55, 200, 18, Text.literal("Nick..."));
+        watchlistInput = new TextFieldWidget(textRenderer, guiX + 14, guiY + 84, 200, 18, Text.literal("Nick..."));
         watchlistInput.setMaxLength(32);
+        watchlistInput.setVisible(false);
+        addDrawableChild(watchlistInput);
 
-        blacklistInput = new TextFieldWidget(textRenderer, guiX + 14, guiY + 55, 200, 18, Text.literal("Nick..."));
+        blacklistInput = new TextFieldWidget(textRenderer, guiX + 14, guiY + 84, 200, 18, Text.literal("Nick..."));
         blacklistInput.setMaxLength(32);
+        blacklistInput.setVisible(false);
+        addDrawableChild(blacklistInput);
     }
 
     @Override
@@ -61,6 +64,12 @@ public class GearReaderScreen extends Screen {
 
         renderTabBar(ctx, mouseX, mouseY, guiX, gY);
         int pY = gY + 52;
+
+        // Zarządzaj widocznością pól
+        watchlistInput.setVisible(currentTab == Tab.WATCHLIST);
+        blacklistInput.setVisible(currentTab == Tab.BLACKLIST);
+        if (currentTab != Tab.WATCHLIST) watchlistInput.setFocused(false);
+        if (currentTab != Tab.BLACKLIST) blacklistInput.setFocused(false);
 
         switch (currentTab) {
             case PLAYERS -> {
@@ -146,12 +155,16 @@ public class GearReaderScreen extends Screen {
         ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l★ WATCHLIST"), pX + 8, pY + 8, -8960);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + all.size() + ")"), pX + pW - textRenderer.getWidth("(" + all.size() + ")") - 6, pY + 8, -10066313);
 
-        // Pole do wpisywania + przycisk Dodaj
+        // Pole do wpisywania
         watchlistInput.setX(pX + 8);
         watchlistInput.setY(pY + 32);
-        watchlistInput.render(ctx, mx, my, 0);
+
+        // Przycisk Dodaj
         int addX = pX + 8 + 206, addY = pY + 32;
         renderInlineBtn(ctx, "§a+ Dodaj", GuiButton.Style.GREEN, addX, addY, 60, 18, hitTest(mx, my, addX, addY, 60, 18));
+
+        // Podpowiedź
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§8Wpisz nick i kliknij Dodaj lub Enter"), pX + 280, pY + 36, -12303258);
 
         ctx.fill(pX, cTop, pX + pW, cBot, -16316657);
         ctx.enableScissor(pX, cTop, pX + pW, cBot);
@@ -170,7 +183,7 @@ public class GearReaderScreen extends Screen {
                 ctx.drawTextWithShadow(textRenderer, Text.literal("§e§l" + entry.data.name + " " + playerType), pX + 44, y + 4, -8960);
                 ctx.drawTextWithShadow(textRenderer, Text.literal("§7Dodano: " + entry.getTimeAgo()), pX + 44, y + 15, -10066313);
                 float hp = entry.data.health / 2.0F, maxHp = entry.data.maxHealth / 2.0F;
-                ctx.drawTextWithShadow(textRenderer, Text.literal("§c❤ §f" + (int)hp + "/" + (int)maxHp), pX + 44, y + 26, -3355427);
+                ctx.drawTextWithShadow(textRenderer, Text.literal("§c❤ §f" + (int) hp + "/" + (int) maxHp), pX + 44, y + 26, -3355427);
                 int iY = y + 40, iX = pX + 44;
                 renderItemSlot(ctx, entry.data.helmet, iX, iY);
                 renderItemSlot(ctx, entry.data.chestplate, iX + 20, iY);
@@ -179,7 +192,6 @@ public class GearReaderScreen extends Screen {
                 ctx.fill(iX + 84, iY - 2, iX + 85, iY + 18, -14013846);
                 renderItemSlot(ctx, entry.data.mainHand, iX + 88, iY);
                 renderItemSlot(ctx, entry.data.offHand, iX + 108, iY);
-                // Przyciski
                 int btnY = y + 48, btnX = pX + pW - 160;
                 renderInlineBtn(ctx, "TPA", GuiButton.Style.GREEN, btnX, btnY, 40, 18, hitTest(mx, my, btnX, btnY, 40, 18));
                 renderInlineBtn(ctx, "STATS", GuiButton.Style.WHITE, btnX + 44, btnY, 50, 18, hitTest(mx, my, btnX + 44, btnY, 50, 18));
@@ -200,12 +212,16 @@ public class GearReaderScreen extends Screen {
         ctx.drawTextWithShadow(textRenderer, Text.literal("§c§l⛔ BLACKLIST"), pX + 8, pY + 8, -48060);
         ctx.drawTextWithShadow(textRenderer, Text.literal("§7(" + all.size() + ")"), pX + pW - textRenderer.getWidth("(" + all.size() + ")") - 6, pY + 8, -10066313);
 
-        // Pole do wpisywania + przycisk Dodaj
+        // Pole do wpisywania
         blacklistInput.setX(pX + 8);
         blacklistInput.setY(pY + 32);
-        blacklistInput.render(ctx, mx, my, 0);
+
+        // Przycisk Dodaj
         int addX = pX + 8 + 206, addY = pY + 32;
         renderInlineBtn(ctx, "§c+ Dodaj", GuiButton.Style.RED, addX, addY, 60, 18, hitTest(mx, my, addX, addY, 60, 18));
+
+        // Podpowiedź
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§8Wpisz nick i kliknij Dodaj lub Enter"), pX + 280, pY + 36, -12303258);
 
         ctx.fill(pX, cTop, pX + pW, cBot, -16316657);
         ctx.enableScissor(pX, cTop, pX + pW, cBot);
@@ -245,7 +261,7 @@ public class GearReaderScreen extends Screen {
         float hp = pd.health / 2.0F, maxHp = pd.maxHealth / 2.0F, abs = pd.absorption / 2.0F;
         float ratio = maxHp > 0 ? hp / maxHp : 0;
         int hpCol = ratio > 0.6F ? -16711868 : (ratio > 0.3F ? -13312 : -56798);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("§c❤ §f" + (int)hp + "/" + (int)maxHp + (abs > 0 ? " §e(+" + (int)abs + ")" : "")), x + 38, y + 26, hpCol);
+        ctx.drawTextWithShadow(textRenderer, Text.literal("§c❤ §f" + (int) hp + "/" + (int) maxHp + (abs > 0 ? " §e(+" + (int) abs + ")" : "")), x + 38, y + 26, hpCol);
         int iY = y + 40, iX = x + 38;
         renderItemSlot(ctx, pd.helmet, iX, iY);
         renderItemSlot(ctx, pd.chestplate, iX + 20, iY);
@@ -270,31 +286,20 @@ public class GearReaderScreen extends Screen {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int mx = (int) mouseX, my = (int) mouseY, gX = guiX, gY = guiY, pY = gY + 52;
 
-        // Input forwarding
+        // Watchlist - przycisk Dodaj
         if (currentTab == Tab.WATCHLIST) {
-            watchlistInput.mouseClicked(mouseX, mouseY, button);
-            // Przycisk Dodaj
             int pX = gX + 6, addX = pX + 8 + 206, addY = pY + 32;
             if (hitTest(mx, my, addX, addY, 60, 18)) {
-                String name = watchlistInput.getText().trim();
-                if (!name.isEmpty()) {
-                    PlayerData pd = new PlayerData(null);
-                    pd.name = name;
-                    WatchlistTracker.add(pd);
-                    watchlistInput.setText("");
-                }
+                addWatchlistFromInput();
                 return true;
             }
         }
+
+        // Blacklist - przycisk Dodaj
         if (currentTab == Tab.BLACKLIST) {
-            blacklistInput.mouseClicked(mouseX, mouseY, button);
             int pX = gX + 6, addX = pX + 8 + 206, addY = pY + 32;
             if (hitTest(mx, my, addX, addY, 60, 18)) {
-                String name = blacklistInput.getText().trim();
-                if (!name.isEmpty()) {
-                    BlacklistTracker.add(name);
-                    blacklistInput.setText("");
-                }
+                addBlacklistFromInput();
                 return true;
             }
         }
@@ -366,43 +371,35 @@ public class GearReaderScreen extends Screen {
     // ===== KEYBOARD =====
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (currentTab == Tab.WATCHLIST && watchlistInput.isFocused()) {
-            if (keyCode == 257) { // Enter
-                String name = watchlistInput.getText().trim();
-                if (!name.isEmpty()) {
-                    PlayerData pd = new PlayerData(null);
-                    pd.name = name;
-                    WatchlistTracker.add(pd);
-                    watchlistInput.setText("");
-                }
+        // Enter dodaje nick
+        if (keyCode == 257) {
+            if (currentTab == Tab.WATCHLIST && watchlistInput.isFocused()) {
+                addWatchlistFromInput();
                 return true;
             }
-            if (watchlistInput.keyPressed(keyCode, scanCode, modifiers)) return true;
-        }
-        if (currentTab == Tab.BLACKLIST && blacklistInput.isFocused()) {
-            if (keyCode == 257) { // Enter
-                String name = blacklistInput.getText().trim();
-                if (!name.isEmpty()) {
-                    BlacklistTracker.add(name);
-                    blacklistInput.setText("");
-                }
+            if (currentTab == Tab.BLACKLIST && blacklistInput.isFocused()) {
+                addBlacklistFromInput();
                 return true;
             }
-            if (blacklistInput.keyPressed(keyCode, scanCode, modifiers)) return true;
         }
-        if (keyCode == 256) { close(); return true; }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
 
-    @Override
-    public boolean charTyped(char chr, int modifiers) {
+        // ESC
+        if (keyCode == 256) {
+            if (watchlistInput.isFocused()) { watchlistInput.setFocused(false); return true; }
+            if (blacklistInput.isFocused()) { blacklistInput.setFocused(false); return true; }
+            close();
+            return true;
+        }
+
+        // Forward do aktywnego pola
         if (currentTab == Tab.WATCHLIST && watchlistInput.isFocused()) {
-            return watchlistInput.charTyped(chr, modifiers);
+            return watchlistInput.keyPressed(keyCode, scanCode, modifiers);
         }
         if (currentTab == Tab.BLACKLIST && blacklistInput.isFocused()) {
-            return blacklistInput.charTyped(chr, modifiers);
+            return blacklistInput.keyPressed(keyCode, scanCode, modifiers);
         }
-        return super.charTyped(chr, modifiers);
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     // ===== SCROLL =====
@@ -419,6 +416,24 @@ public class GearReaderScreen extends Screen {
     }
 
     // ===== HELPERS =====
+    private void addWatchlistFromInput() {
+        String name = watchlistInput.getText().trim();
+        if (!name.isEmpty()) {
+            PlayerData pd = new PlayerData(null);
+            pd.name = name;
+            WatchlistTracker.add(pd);
+            watchlistInput.setText("");
+        }
+    }
+
+    private void addBlacklistFromInput() {
+        String name = blacklistInput.getText().trim();
+        if (!name.isEmpty()) {
+            BlacklistTracker.add(name);
+            blacklistInput.setText("");
+        }
+    }
+
     private void sendCommand(String cmd) {
         if (MinecraftClient.getInstance().player != null)
             MinecraftClient.getInstance().player.networkHandler.sendChatCommand(cmd);
@@ -474,7 +489,11 @@ public class GearReaderScreen extends Screen {
     private void fillGradientH(DrawContext ctx, int x, int y, int w, int h, int cL, int cR) {
         for (int i = 0; i < w; i++) {
             float t = (float) i / w;
-            ctx.fill(x + i, y, x + i + 1, y + h, lerp(cL >> 24 & 255, cR >> 24 & 255, t) << 24 | lerp(cL >> 16 & 255, cR >> 16 & 255, t) << 16 | lerp(cL >> 8 & 255, cR >> 8 & 255, t) << 8 | lerp(cL & 255, cR & 255, t));
+            ctx.fill(x + i, y, x + i + 1, y + h,
+                lerp(cL >> 24 & 255, cR >> 24 & 255, t) << 24 |
+                lerp(cL >> 16 & 255, cR >> 16 & 255, t) << 16 |
+                lerp(cL >> 8 & 255, cR >> 8 & 255, t) << 8 |
+                lerp(cL & 255, cR & 255, t));
         }
     }
 
@@ -496,5 +515,6 @@ public class GearReaderScreen extends Screen {
 
     @Override
     public boolean shouldPause() { return false; }
+
     private enum Tab { PLAYERS, WATCHLIST, BLACKLIST }
 }
