@@ -131,7 +131,7 @@ public class GearReaderScreen extends Screen {
         ctx.enableScissor(pX, cTop, pX + pW, cBot);
         if (list.isEmpty()) {
             ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7Brak wykrytych RTP"), pX + pW / 2, cTop + (cBot - cTop) / 2 - 10, -10066313);
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§8(gracz musi zniknąć przy buttonie)"), pX + pW / 2, cTop + (cBot - cTop) / 2 + 4, -12303258);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§8(gracz musi zniknąć przy buttonie na gąbce)"), pX + pW / 2, cTop + (cBot - cTop) / 2 + 4, -12303258);
         }
         int y = cTop + 4 - rightScroll;
         for (DisappearedTracker.DisappearedEntry entry : list) {
@@ -465,8 +465,7 @@ public class GearReaderScreen extends Screen {
         if (stack != null && !stack.isEmpty()) {
             if (ItemChecker.isNetherite(stack)) ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x55AA00AA);
             else if (ItemChecker.isLeatherArmor(stack)) ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x55FFAA00);
-            else if (ItemChecker.isTrident(stack)) ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x5500AAFF);
-            else if (ItemChecker.hasCustomModelData(stack)) ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x55FF00FF);
+            else if (ItemChecker.isElytra(stack)) ctx.fill(x - 1, y - 1, x + 17, y + 17, 0x55AAAAAA);
             ctx.drawItem(stack, x, y);
         } else {
             ctx.fill(x, y, x + 16, y + 16, -15921894);
