@@ -3,15 +3,13 @@ package com.example;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 
 public class ItemChecker {
     
     public static boolean hasRequiredItems(PlayerData data) {
         return hasLeatherArmor(data) ||
                hasNetheriteItems(data) ||
-               hasTrident(data) ||
-               hasCustomModelData(data);
+               hasElytra(data);
     }
     
     // Leather armor
@@ -55,28 +53,16 @@ public class ItemChecker {
                item == Items.NETHERITE_HOE;
     }
     
-    // Trident
-    public static boolean hasTrident(PlayerData data) {
-        return isTrident(data.mainHand) || isTrident(data.offHand);
+    // Elytra
+    public static boolean hasElytra(PlayerData data) {
+        return isElytra(data.chestplate) ||
+               isElytra(data.mainHand) ||
+               isElytra(data.offHand);
     }
     
-    public static boolean isTrident(ItemStack stack) {
+    public static boolean isElytra(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
-        return stack.getItem() == Items.TRIDENT;
-    }
-    
-    // Custom Model Data (w ręce)
-    public static boolean hasCustomModelData(PlayerData data) {
-        return hasCustomModelData(data.mainHand) || hasCustomModelData(data.offHand);
-    }
-    
-    public static boolean hasCustomModelData(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) return false;
-        NbtCompound nbt = stack.getNbt();
-        if (nbt != null && nbt.contains("CustomModelData")) {
-            return true;
-        }
-        return false;
+        return stack.getItem() == Items.ELYTRA;
     }
     
     // Helper do wyświetlania typu gracza
@@ -84,8 +70,7 @@ public class ItemChecker {
         StringBuilder sb = new StringBuilder();
         if (hasNetheriteItems(data)) sb.append("§5⚔ ");
         if (hasLeatherArmor(data)) sb.append("§6🛡 ");
-        if (hasTrident(data)) sb.append("§b🔱 ");
-        if (hasCustomModelData(data)) sb.append("§d✦ ");
+        if (hasElytra(data)) sb.append("§7🪂 ");
         return sb.toString().trim();
     }
 }
