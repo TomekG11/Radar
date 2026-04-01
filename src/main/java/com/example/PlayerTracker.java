@@ -1,5 +1,6 @@
 package com.example;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,11 +37,16 @@ public class PlayerTracker {
                         // Najnowsi na górze
                         newList.add(0, pd);
                         
-                        // Sprawdź czy gracz jest blisko buttona (max 5 bloków)
-                        if (isNearStoneButton(player, client, 5)) {
+                        // Sprawdź czy gracz jest blisko buttona na gąbce (min 4 kratki)
+                        if (isNearSpongeButton(player, client, 4)) {
                             nearButtonPlayers.put(name, pd);
                         }
                     }
+                }
+
+                // Usuń graczy z listy RTP jeśli wrócili do zasięgu
+                for (String name : currentNames) {
+                    DisappearedTracker.remove(name);
                 }
 
                 // Sprawdź czy gracze którzy byli blisko buttona zniknęli
@@ -50,7 +56,7 @@ public class PlayerTracker {
                     String name = entry.getKey();
                     
                     if (!currentNames.contains(name)) {
-                        // Gracz zniknął będąc blisko buttona → RTP!
+                        // Gracz zniknął będąc blisko buttona na gąbce → RTP!
                         DisappearedTracker.markDisappeared(entry.getValue());
                         it.remove();
                     }
@@ -61,16 +67,31 @@ public class PlayerTracker {
         }
     }
 
-    private static boolean isNearStoneButton(PlayerEntity player, MinecraftClient client, int radius) {
-        BlockPos pos = player.getBlockPos();
+    /**
+     * Sprawdza czy gracz jest w odległości co najmniej minDistance kratek od stone_button,
+     * który stoi na sponge (gąbce). Szukamy w promieniu 10 bloków.
+     */
+    private static boolean isNearSpongeButton(PlayerEntity player, MinecraftClient client, int minDistance) {
+        BlockPos playerPos = player.getBlockPos();
+        int searchRadius = 10;
         
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    BlockPos checkPos = pos.add(x, y, z);
+        for (int x = -searchRadius; x <= searchRadius; x++) {
+            for (int y = -searchRadius; y <= searchRadius; y++) {
+                for (int z = -searchRadius; z <= searchRadius; z++) {
+                    BlockPos checkPos = playerPos.add(x, y, z);
                     try {
-                        if (client.world.getBlockState(checkPos).getBlock() == Blocks.STONE_BUTTON) {
-                            return true;
+                        Block block = client.world.getBlockState(checkPos).getBlock();
+                        if (block == Blocks.STONE_BUTTON) {
+                            // Sprawdź czy pod buttonem jest gąbka
+                            BlockPos belowButton = checkPos.down();
+                            Block blockBelow = client.world.getBlockState(belowButton).getBlock();
+                            if (blockBelow == Blocks.SPONGE || blockBelow == Blocks.WET_SPONGE) {
+                                // Oblicz odległość gracza od buttona
+                                double distance = Math.sqrt(playerPos.getSquaredDistance(checkPos));
+                                if (distance >= minDistance) {
+                                    return true;
+                                }
+                            }
                         }
                     } catch (Exception e) {
                         // Chunk not loaded
